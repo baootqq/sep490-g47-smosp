@@ -3,6 +3,8 @@ package com.sep490_g47.smosp.auth.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.UUID;
+
 @Entity
 @Table(name = "roles")
 @Getter @Setter
@@ -11,9 +13,12 @@ import lombok.*;
 public class Role {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @Column(nullable = false, unique = true, length = 50)
     private String name; // ROLE_STUDENT, ROLE_CONTENT_MANAGER, ROLE_ADMIN
+
+    @Column(columnDefinition = "TEXT")
+    private String description;
 }

@@ -38,12 +38,23 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Public endpoints
                         .requestMatchers(
-                                "/api/auth/**",
+                                "/api/auth/register",
+                                "/api/auth/verify-email/**",
+                                "/api/auth/login",
+                                "/api/auth/google",
+                                "/api/auth/refresh",
+                                "/api/auth/password/forgot",
+                                "/api/auth/password/reset",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
                                 "/api-docs/**",
                                 "/v3/api-docs/**"
                         ).permitAll()
+                        .requestMatchers(
+                                "/api/auth/logout",
+                                "/api/auth/password/change",
+                                "/api/me/**"
+                        ).authenticated()
                         // Tất cả endpoint khác cần xác thực
                         .anyRequest().authenticated()
                 )

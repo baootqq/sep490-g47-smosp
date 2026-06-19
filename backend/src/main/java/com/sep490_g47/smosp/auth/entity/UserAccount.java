@@ -6,8 +6,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.UUID;
 
 @Entity
 @Table(name = "user_accounts")
@@ -17,8 +16,12 @@ import java.util.Set;
 public class UserAccount {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "role_id", nullable = false)
+    private Role role;
 
     @Column(unique = true, length = 100)
     private String email;
@@ -29,22 +32,16 @@ public class UserAccount {
     @Column(name = "password_hash", length = 255)
     private String passwordHash;
 
-    @Column(name = "is_active", nullable = false)
+    @Column(nullable = false, length = 20)
     @Builder.Default
-    private Boolean isActive = false;
+    private String status = "ACTIVE"; // ACTIVE / INACTIVE
 
-    @Column(name = "is_locked", nullable = false)
+    @Column(name = "failed_login_attempts", nullable = false)
     @Builder.Default
-    private Boolean isLocked = false;
+    private Integer failedLoginAttempts = 0;
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-            name = "user_roles",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id")
-    )
-    @Builder.Default
-    private Set<Role> roles = new HashSet<>();
+    @Column(name = "lock_time")
+    private LocalDateTime lockTime;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
