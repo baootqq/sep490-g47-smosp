@@ -27,8 +27,14 @@ function LoginPage() {
     localStorage.setItem("accessToken",  data.accessToken);
     localStorage.setItem("refreshToken", data.refreshToken);
     localStorage.setItem("username",     data.username);
-    if (data.roles?.length > 0) localStorage.setItem("role", data.roles[0]);
-    navigate("/");
+    const role = data.roles?.length > 0 ? data.roles[0] : null;
+    if (role) localStorage.setItem("role", role);
+    
+    if (role === "ROLE_ADMIN") {
+      navigate("/admin/dashboard");
+    } else {
+      navigate("/");
+    }
   };
 
   useEffect(() => {
