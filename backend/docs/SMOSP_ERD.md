@@ -1,23 +1,16 @@
-# SMOSP — Database Schema (ERD v4)
-> DBML format for dbdiagram.io | Updated: 17/06/2026
-> Changes from v3: [FIX-11] recommendation_item weight snapshots | [FIX-12] crawl_batch scope_narrow_spec_id | [FIX-13] ai_api_usage_log reference_id | [FIX-14] holland_session.triggered_by note
+# SMOSP ERD v5 — DBML Schema Reference
+> Cập nhật: 17/06/2026 | 47 tables, 6 clusters
 
----
+// ============================================================
+// SMOSP ERD v5 — DBML
+// Cập nhật: 17/06/2026
+//
+// THAY ĐỔI:
+// [FIX-15] Holland Test Refactor:
+// - Move `riasec_dimension` to `holland_question`.
+// - Turn `holland_answer_option` into a Master Data table (shared across all questions) per BR-32 Likert scale.
+// ============================================================
 
-## Clusters
-
-1. Auth & User
-2. Catalog & Curriculum
-3. Student Profile & Roadmap
-4. Configuration & Recommendation
-5. Holland
-6. Crawler, Trending Weight & System Config
-
----
-
-## Full DBML
-
-```dbml
 // ── CLUSTER 1: AUTH & USER ──────────────────────────────────
 
 Table role {
@@ -61,7 +54,7 @@ Table password_reset_token {
 Table email_verification_token {
   id         uuid      [pk]
   user_id    uuid      [not null, ref: > user_account.id]
-  token varchar [not null, unique]
+  token      varchar   [not null, unique]
   expires_at timestamp [not null, note: '15 minutes']
   used       boolean   [not null, default: false]
   created_at timestamp [not null, default: `now()`]
@@ -116,7 +109,6 @@ Table narrow_spec {
   published_at      timestamp
 }
 
-// Môn chung toàn specialization (kỳ 1–3: General/Core)
 Table spec_course {
   id                uuid    [pk]
   specialization_id uuid    [not null, ref: > specialization.id]
@@ -140,7 +132,6 @@ Table course {
   is_active         boolean [not null, default: true]
 }
 
-// Môn chuyên sâu riêng từng narrow spec (kỳ 4–9)
 Table ns_course {
   id             uuid    [pk]
   narrow_spec_id uuid    [not null, ref: > narrow_spec.id]
@@ -173,7 +164,6 @@ Table learning_resource {
   created_at    timestamp [not null, default: `now()`]
 }
 
-// Skill scoped per specialization (CM selects specialization first)
 Table skill {
   id                uuid      [pk]
   specialization_id uuid      [not null, ref: > specialization.id]
@@ -246,8 +236,6 @@ Table student_course_grade {
   status          varchar [not null, note: 'PASSED / FAILED / STUDYING']
 }
 
-// Used in FT-51: suggest skills from PASSED courses
-// Flow: parse transcript → course_id with status=PASSED → lookup course_skill_map → suggest
 Table course_skill_map {
   id        uuid [pk]
   course_id uuid [not null, ref: > course.id]
@@ -287,7 +275,6 @@ Table personal_roadmap {
   name           varchar   [not null]
   cloned_at      timestamp [not null, default: `now()`]
   updated_at     timestamp [not null, default: `now()`]
-  // max 5 clones per student — enforced at app layer (BV-24)
 }
 
 Table personal_roadmap_item {
@@ -326,26 +313,39 @@ Table roadmap_note {
   }
 }
 
-// transfer_type = NARROW_SPEC   → from/to_narrow_spec_id
-// transfer_type = SPECIALIZATION → from/to_specialization_id
-// transfer_type = MAJOR          → from/to_major_id
 Table transfer_impact_session {
   id                      uuid      [pk]
   student_id              uuid      [not null, ref: > student_profile.id]
-  transfer_type           varchar   [not null, note: 'NARROW_SPEC / SPECIALIZATION / MAJOR']
+  transfer_type           varchar   [not null, note: 'NARROW_SPEC / SPECIALIZATION']
+
+  // NARROW_SPEC: from + to NS đủ
+  // SPECIALIZATION: from NS + to Spec + to NS (NS cụ thể trong Spec mục tiêu)
   from_narrow_spec_id     uuid      [ref: > narrow_spec.id]
   to_narrow_spec_id       uuid      [ref: > narrow_spec.id]
   from_specialization_id  uuid      [ref: > specialization.id]
-  to_specialization_id    uuid      [ref: > specialization.id]
-  from_major_id           uuid      [ref: > major.id]
-  to_major_id             uuid      [ref: > major.id]
-  courses_retained        jsonb     [note: 'retained (no cost)']
-  courses_retake          jsonb     [note: 'failed previously, need retake']
-  courses_new             jsonb     [note: 'never taken, need to register']
-  courses_wasted          jsonb     [note: 'taken + paid but not in target curriculum']
-  difficulty_indicators   jsonb
-  market_signals          jsonb
-  estimated_cost          decimal
+  to_specialization_id    uuid      [ref: > specialization.id, 
+                                     note: 'NOT NULL khi transfer_type=SPECIALIZATION']
+
+  courses_retained        jsonb     [note: 'đã học & đạt — miễn phí']
+  courses_retake          jsonb     [note: 'đã học nhưng trượt — tính giá học lại']
+  courses_new             jsonb     [note: 'chưa từng học — tính full cost']
+  courses_wasted          jsonb     [note: 'đã học nhưng không dùng trong target curriculum']
+
+  // Tách cost để hiển thị riêng dòng (BR-51)
+  academic_cost           decimal   [not null, default: 0, 
+                                     note: 'Σ retake cost + new courses cost']
+  admin_fee               decimal   [not null, default: 2500000, 
+                                     note: 'phí hành chính cố định BR-51']
+  total_cost              decimal   [not null, default: 0, 
+                                     note: 'academic_cost + admin_fee']
+
+  // Tách ra khỏi difficulty_indicators để query được (BV-34)
+  estimated_extra_terms   int       [not null, default: 0, 
+                                     note: 'số kỳ bổ sung ước tính — BV-34 warn nếu ≥ 4']
+
+  difficulty_indicators   jsonb     [note: 'các chỉ số khó khác ngoài term count']
+  market_signals          jsonb     [note: 'job count, salary range, TW của NS mục tiêu']
+
   created_at              timestamp [not null, default: `now()`]
 }
 
@@ -365,10 +365,6 @@ Table tag_map {
   }
 }
 
-// alpha_base auto-init from major.discipline_group when NS is created:
-//   IT=0.70, Business=0.75, Languages=0.85, Law=0.90, DigitalArt=0.95
-// CM can override per NS
-// w_gpa + w_skill + w_int = 1.0 — enforced at app layer
 Table narrow_spec_weight_config {
   id             uuid      [pk]
   narrow_spec_id uuid      [not null, unique, ref: - narrow_spec.id]
@@ -379,6 +375,7 @@ Table narrow_spec_weight_config {
   updated_by     uuid      [not null, ref: > user_account.id]
   updated_at     timestamp [not null, default: `now()`]
 }
+
 
 Table narrow_spec_weight_config_audit {
   id             uuid      [pk]
@@ -402,9 +399,6 @@ Table recommendation_result {
   calculated_at timestamp [not null, default: `now()`]
 }
 
-// Snapshots: audit result even after CM changes weights later (BR-04)
-// profile_score = w_gpa_snapshot*gpa_score + w_skill_snapshot*skill_score + w_int_snapshot*interest_score
-// final_score   = alpha_actual*profile_score + (1-alpha_actual)*trending_weight_snapshot
 Table recommendation_item {
   id                       uuid    [pk]
   result_id                uuid    [not null, ref: > recommendation_result.id]
@@ -428,18 +422,18 @@ Table recommendation_item {
 // ── CLUSTER 5: HOLLAND ─────────────────────────────────────
 
 Table holland_question {
-  id            uuid    [pk]
-  question_text text    [not null]
-  is_active     boolean [not null, default: true]
-  display_order int     [not null, default: 0]
+  id               uuid    [pk]
+  question_text    text    [not null]
+  riasec_dimension varchar [not null, note: 'R / I / A / S / E / C']
+  is_active        boolean [not null, default: true]
+  display_order    int     [not null, default: 0]
 }
 
 Table holland_answer_option {
   id               uuid    [pk]
-  question_id      uuid    [not null, ref: > holland_question.id]
-  option_text      text    [not null]
-  riasec_dimension varchar [not null, note: 'R / I / A / S / E / C']
-  weight           decimal [not null, default: 1.0, note: 'Likert 1–5 — BR-32']
+  option_text      text    [not null, note: 'e.g. 1-Hoàn toàn không đồng ý']
+  weight           decimal [not null, note: 'Likert 1–5 — BR-32']
+  note: 'Master Data: Only 5 shared records needed for the entire questionnaire'
 }
 
 Table holland_session {
@@ -463,7 +457,6 @@ Table holland_response {
   }
 }
 
-// context_specialization_id = specialization being considered for transfer
 Table holland_result {
   id                        uuid      [pk]
   session_id                uuid      [not null, unique, ref: - holland_session.id]
@@ -472,6 +465,21 @@ Table holland_result {
   context_specialization_id uuid      [ref: > specialization.id, note: 'nullable if no transfer context']
   created_at                timestamp [not null, default: `now()`]
 }
+
+// CM cấu hình: mỗi chiều RIASEC đóng góp bao nhiêu điểm vào mỗi Specialization
+Table holland_spec_weight {
+  id               uuid    [pk]
+  specialization_id uuid   [not null, ref: > specialization.id]
+  riasec_dimension  varchar [not null, note: 'R / I / A / S / E / C']
+  weight            decimal [not null, note: '0.0–1.0 — đóng góp của chiều này vào score của spec']
+  updated_by        uuid    [ref: > user_account.id]
+  updated_at        timestamp [not null, default: `now()`]
+
+  indexes {
+    (specialization_id, riasec_dimension) [unique]
+  }
+}
+
 
 // ── CLUSTER 6: CRAWLER, TW & SYSTEM CONFIG ─────────────────
 
@@ -583,7 +591,6 @@ Table ai_api_usage_log {
   called_at    timestamp [not null, default: `now()`]
 }
 
-// Unique (major_id, academic_year, term)
 Table tuition_config {
   id                      uuid      [pk]
   major_id                uuid      [not null, ref: > major.id]
@@ -597,12 +604,4 @@ Table tuition_config {
     (major_id, academic_year, term) [unique]
   }
 }
-```
 
----
-
-## Open Questions
-
-| # | Question | Status |
-|---|---------|--------|
-| 1 | `holland_session.triggered_by` — is `MANUAL` a valid enum value given FE-08 may only trigger during transfer consideration? | Pending |

@@ -43,6 +43,13 @@ public class UserAccount {
     @Column(name = "lock_time")
     private LocalDateTime lockTime;
 
+    @Column(name = "display_name", length = 100)
+    private String displayName;
+
+    @Column(name = "notif_enabled", nullable = false)
+    @Builder.Default
+    private Boolean notifEnabled = true;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

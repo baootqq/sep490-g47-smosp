@@ -45,6 +45,7 @@ public class AuthServiceImpl implements AuthService {
             UserAccount user = UserAccount.builder()
                     .email(request.getEmail())
                     .passwordHash(passwordEncoder.encode(request.getPassword()))
+                    .displayName(request.getFullName())
                     .status("INACTIVE")
                     .role(studentRole)
                     .failedLoginAttempts(0)
