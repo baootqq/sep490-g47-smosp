@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 
+import Homepage from "../pages/Homepage";
 import LoginPage from "../pages/auth/LoginPage";
 import RegisterPage from "../pages/auth/RegisterPage";
 import ForgotPasswordPage from "../pages/auth/ForgotPasswordPage";
@@ -10,6 +11,7 @@ import AdminDashboard from "../pages/admin/AdminDashboard";
 function AppRoutes() {
   return (
     <Routes>
+      <Route path="/" element={<Homepage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
@@ -18,8 +20,6 @@ function AppRoutes() {
       
       {/* Dashboard Admin */}
       <Route path="/admin/dashboard" element={<AdminDashboard />} />
-
-      <Route path="/" element={<Navigate to="/login" replace />} />
     </Routes>
   );
 }

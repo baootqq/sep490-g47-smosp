@@ -17,6 +17,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { Menu, X } from 'lucide-react'
+import logoSvg from '../../asset/logo.svg'
 
 /* ── CSS ─────────────────────────────────────────────────── */
 
@@ -31,40 +32,32 @@ const NAVBAR_CSS = `
     box-shadow: 0 2px 16px rgba(3, 78, 162, 0.25);
   }
   .smosp-nav-inner {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 48px;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    gap: 32px;
-  }
+  width: 100%;
+  height: 100%;
+  padding: 0 32px;
+
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+}
   .smosp-logo {
-    display: flex;
-    align-items: flex-end;
-    gap: 3px;
-    font-size: 20px;
-    font-weight: 800;
-    color: #fff;
-    letter-spacing: -0.02em;
-    flex-shrink: 0;
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 0;
-    font-family: 'Be Vietnam Pro', sans-serif;
-  }
-  .smosp-logo-dot {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: #F37021;
-    margin-bottom: 4px;
-    flex-shrink: 0;
-  }
+  display: flex;
+  align-items: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+}
+  .smosp-logo-image {
+  height: 40px;
+  width: auto;
+  display: block;
+}
+  
   .smosp-nav-links {
     display: flex;
-    gap: 4px;
+    gap: 200px;
     flex: 1;
   }
   .smosp-nav-link {
@@ -187,7 +180,7 @@ const NAVBAR_CSS = `
 /* ── Component ───────────────────────────────────────────── */
 
 export default function Navbar({
-  logo = 'OrientFPT',
+  logo = '',
   links = [],
   ctaLabel = 'Bắt Đầu',
   onCtaClick,
@@ -219,13 +212,17 @@ export default function Navbar({
 
           {/* Logo */}
           <button
-            className="smosp-logo"
-            onClick={onLogoClick}
-            aria-label={`${logo} — về trang chủ`}
-          >
-            {logo}
-            <span className="smosp-logo-dot" aria-hidden="true" />
-          </button>
+  className="smosp-logo"
+  onClick={onLogoClick}
+  aria-label="SMOSP - Về trang chủ"
+>
+  <img
+    src={logoSvg}
+    alt="SMOSP"
+    style={{ marginRight: "12px" }}
+    className="smosp-logo-image"
+  /> <div style={{ color: "var(--primary)", fontWeight: 800, fontSize: "1.25rem" }}>SMOSP</div>
+</button>
 
           {/* Desktop links */}
           <div className="smosp-nav-links" role="navigation" aria-label="Điều hướng chính">
@@ -326,7 +323,7 @@ export default function Navbar({
  *
  * // Chưa đăng nhập
  * <Navbar
- *   logo="OrientFPT"
+ *   logo=""
  *   links={NAV_LINKS}
  *   ctaLabel="Bắt Đầu"
  *   onCtaClick={() => navigate('/register')}
@@ -335,7 +332,7 @@ export default function Navbar({
  *
  * // Đã đăng nhập
  * <Navbar
- *   logo="OrientFPT"
+ *   logo=""
  *   links={NAV_LINKS}
  *   user={{ name: 'Nguyễn Văn A' }}
  *   onLogoClick={() => navigate('/')}
