@@ -23,4 +23,12 @@ public interface AccountService {
      * @return the updated user's information as a MeResponse
      */
     MeResponse updatePreferences(UUID userId, UpdatePreferencesRequest request);
+
+    /**
+     * Saves the FCM token for the authenticated user.
+     *
+     * @param userId the ID of the authenticated user
+     * @param token the FCM token
+     */
+    void saveFcmToken(UUID userId, String token);
 }

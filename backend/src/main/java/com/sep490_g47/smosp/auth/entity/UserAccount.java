@@ -50,6 +50,9 @@ public class UserAccount {
     @Builder.Default
     private Boolean notifEnabled = true;
 
+    @Column(name = "fcm_token", length = 500)
+    private String fcmToken;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

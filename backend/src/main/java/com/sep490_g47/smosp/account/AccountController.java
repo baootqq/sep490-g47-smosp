@@ -27,4 +27,12 @@ public class AccountController {
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         return ResponseEntity.ok(accountService.updatePreferences(userDetails.getUserId(), request));
     }
+
+    @PostMapping("/fcm-token")
+    public ResponseEntity<Void> saveFcmToken(
+            @Valid @RequestBody com.sep490_g47.smosp.account.dto.FcmTokenRequest request,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        accountService.saveFcmToken(userDetails.getUserId(), request.getToken());
+        return ResponseEntity.ok().build();
+    }
 }

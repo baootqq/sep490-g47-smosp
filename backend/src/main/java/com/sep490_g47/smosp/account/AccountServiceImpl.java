@@ -43,6 +43,15 @@ public class AccountServiceImpl implements AccountService {
         return mapToMeResponse(user);
     }
 
+    @Override
+    @Transactional
+    public void saveFcmToken(UUID userId, String token) {
+        UserAccount user = userAccountRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found"));
+        user.setFcmToken(token);
+        userAccountRepository.save(user);
+    }
+
     private MeResponse mapToMeResponse(UserAccount user) {
         String roleStr = user.getRole().getName();
         if (roleStr.startsWith("ROLE_")) {
