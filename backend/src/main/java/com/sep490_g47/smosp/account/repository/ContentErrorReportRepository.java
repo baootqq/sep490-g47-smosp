@@ -10,4 +10,6 @@ import java.util.UUID;
 @Repository
 public interface ContentErrorReportRepository extends JpaRepository<ContentErrorReport, UUID> {
     List<ContentErrorReport> findByReporterIdOrderByCreatedAtDesc(UUID reporterId);
+    List<ContentErrorReport> findByStatusOrderByCreatedAtDesc(com.sep490_g47.smosp.account.enums.ReportStatus status);
+    List<ContentErrorReport> findAllByOrderByCreatedAtDesc();
 }

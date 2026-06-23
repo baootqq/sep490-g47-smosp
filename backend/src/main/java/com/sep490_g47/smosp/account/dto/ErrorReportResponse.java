@@ -18,4 +18,5 @@ public class ErrorReportResponse {
     private String description;
     private ReportStatus status;
     private Instant createdAt;
+    private String processingNote;
 }

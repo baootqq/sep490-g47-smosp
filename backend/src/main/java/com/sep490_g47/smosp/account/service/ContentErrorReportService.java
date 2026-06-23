@@ -13,4 +13,9 @@ public interface ContentErrorReportService {
     ErrorReportResponse getReportById(UUID reporterId, UUID reportId);
     ErrorReportResponse updateReport(UUID reporterId, UUID reportId, UpdateContentErrorReportRequest request);
     void deleteReport(UUID reporterId, UUID reportId);
+
+    // CM methods
+    List<ErrorReportResponse> getAllReports(com.sep490_g47.smosp.account.enums.ReportStatus status);
+    ErrorReportResponse getReportByIdForCm(UUID reportId);
+    ErrorReportResponse processReport(UUID reportId, com.sep490_g47.smosp.account.dto.ProcessReportRequest request);
 }
