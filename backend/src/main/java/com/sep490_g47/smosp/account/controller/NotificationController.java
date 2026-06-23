@@ -1,5 +1,6 @@
-package com.sep490_g47.smosp.account;
+package com.sep490_g47.smosp.account.controller;
 
+import com.sep490_g47.smosp.account.service.NotificationService;
 import com.sep490_g47.smosp.account.dto.NotificationResponse;
 import com.sep490_g47.smosp.auth.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;

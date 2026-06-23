@@ -1,5 +1,6 @@
-package com.sep490_g47.smosp.account;
+package com.sep490_g47.smosp.account.controller;
 
+import com.sep490_g47.smosp.account.service.AccountService;
 import com.sep490_g47.smosp.account.dto.MeResponse;
 import com.sep490_g47.smosp.account.dto.UpdatePreferencesRequest;
 import com.sep490_g47.smosp.auth.security.CustomUserDetails;
