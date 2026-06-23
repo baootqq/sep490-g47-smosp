@@ -12,6 +12,10 @@ import com.sep490_g47.smosp.auth.utils.HashUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthException;
+import com.google.firebase.auth.FirebaseToken;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -33,6 +37,9 @@ public class AuthServiceImpl implements AuthService {
 
     private static final int MAX_FAILED_ATTEMPTS = 5;
     private static final int LOCK_TIME_DURATION_MINUTES = 30;
+
+    @Value("${spring.security.oauth2.client.registration.google.client-id:YOUR_GOOGLE_CLIENT_ID}")
+    private String googleClientId;
 
     @Override
     @Transactional
@@ -186,8 +193,15 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public AuthResponse googleLogin(GoogleLoginRequest request) {
-        String userEmail = "student@fpt.edu.vn"; // Mock email logic
-        String providerUid = "google-uid-123";
+        FirebaseToken decodedToken;
+        try {
+            decodedToken = FirebaseAuth.getInstance().verifyIdToken(request.getIdToken());
+        } catch (FirebaseAuthException e) {
+            throw new AuthBusinessException("Invalid Firebase ID token: " + e.getMessage());
+        }
+
+        String userEmail = decodedToken.getEmail();
+        String providerUid = decodedToken.getUid();
         
         UserAccount user = userAccountRepository.findByEmail(userEmail)
                 .orElseGet(() -> {

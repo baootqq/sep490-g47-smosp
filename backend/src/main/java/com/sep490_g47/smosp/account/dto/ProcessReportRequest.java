@@ -8,7 +8,7 @@ import lombok.Data;
 public class ProcessReportRequest {
 
     @NotNull(message = "Status cannot be null")
-    private ReportStatus status;
+    private ReportStatus status; // PENDING, RESOLVED, DISMISSED
 
-    private String note;
+    private String note;// Ghi chú (bắt buộc nếu là DISMISSED)
 }
