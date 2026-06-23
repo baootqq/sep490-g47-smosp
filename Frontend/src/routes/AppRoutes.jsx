@@ -7,6 +7,7 @@ import ForgotPasswordPage from "../pages/auth/ForgotPasswordPage";
 import ResetPasswordPage from "../pages/auth/ResetPasswordPage";
 import VerifyEmailPage from "../pages/auth/VerifyEmailPage";
 import AdminDashboard from "../pages/admin/AdminDashboard";
+import MajorCatalog from "../pages/guest/Majorcatalog";
 
 function AppRoutes() {
   return (
@@ -17,6 +18,7 @@ function AppRoutes() {
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route path="/verify-email" element={<VerifyEmailPage />} />
+      <Route path="/major-catalog" element={<MajorCatalog />} />
       
       {/* Dashboard Admin */}
       <Route path="/admin/dashboard" element={<AdminDashboard />} />

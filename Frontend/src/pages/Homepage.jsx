@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import Navbar from "../components/common/Navbar";
 import "./Homepage.css";
+import Majorcatalog from "./guest/Majorcatalog.jsx";
 
 /* =========================================================
    SCROLL REVEAL HOOK
@@ -79,8 +80,8 @@ function StudentRoadmapMock() {
 
 function SuggestionMock() {
   const tracks = [
-    { name: "Kỹ nghệ Phần mềm (SE)", match: 98, level: "Rất Cao",  barClass: "mock-bar-blue" },
-    { name: "Trí tuệ Nhân tạo (AI)", match: 92, level: "Rất Cao",  barClass: "mock-bar-orange" },
+    { name: "Kỹ nghệ Phần mềm (SE)", match: 98, level: "Rất Cao", barClass: "mock-bar-blue" },
+    { name: "Trí tuệ Nhân tạo (AI)", match: 92, level: "Rất Cao", barClass: "mock-bar-orange" },
     { name: "An toàn Thông tin (CS)", match: 74, level: "Phù Hợp", barClass: "mock-bar-green" },
   ];
 
@@ -131,12 +132,12 @@ function SuggestionMock() {
 
 function HollandMock() {
   const stats = [
-    { label: "REALISTIC (Kỹ thuật)",        val: 85, barClass: "mock-bar-blue" },
-    { label: "INVESTIGATIVE (Nghiên cứu)",  val: 95, barClass: "mock-bar-orange" },
-    { label: "ARTISTIC (Nghệ thuật)",        val: 60, barClass: "mock-bar-green" },
-    { label: "SOCIAL (Xã hội)",              val: 45, barClass: "mock-bar-indigo" },
-    { label: "ENTERPRISING (Quản lý)",       val: 78, barClass: "mock-bar-amber" },
-    { label: "CONVENTIONAL (Nề nếp)",        val: 52, barClass: "mock-bar-purple" },
+    { label: "REALISTIC (Kỹ thuật)", val: 85, barClass: "mock-bar-blue" },
+    { label: "INVESTIGATIVE (Nghiên cứu)", val: 95, barClass: "mock-bar-orange" },
+    { label: "ARTISTIC (Nghệ thuật)", val: 60, barClass: "mock-bar-green" },
+    { label: "SOCIAL (Xã hội)", val: 45, barClass: "mock-bar-indigo" },
+    { label: "ENTERPRISING (Quản lý)", val: 78, barClass: "mock-bar-amber" },
+    { label: "CONVENTIONAL (Nề nếp)", val: 52, barClass: "mock-bar-purple" },
   ];
 
   return (
@@ -255,6 +256,11 @@ export default function Home({
     initialIntroTab === "none" ? "none" : initialIntroTab
   );
 
+  const token = localStorage.getItem("accessToken");
+  const actualIsLoggedIn = isLoggedIn !== undefined ? isLoggedIn : !!token;
+  const username = localStorage.getItem("username");
+  const user = actualIsLoggedIn && username ? { name: username } : null;
+
   /* Activate scroll reveal */
   useScrollReveal();
 
@@ -271,7 +277,16 @@ export default function Home({
   };
 
   const gotoFeature = (tab) => {
-    isLoggedIn ? onNavigateToPortalTab?.(tab) : openLogin("login");
+    if (actualIsLoggedIn) {
+      const role = localStorage.getItem("role");
+      if (role === "ROLE_ADMIN") {
+        navigate("/admin/dashboard");
+      } else {
+        onNavigateToPortalTab?.(tab);
+      }
+    } else {
+      openLogin("login");
+    }
   };
 
   return (
@@ -280,15 +295,59 @@ export default function Home({
       {/* ── Navbar ── */}
       <Navbar
         links={[
-          { label: "Dashboard",    href: "#" },
-          { label: "Trang chủ",    href: "#" },
-          { label: "Holland Test",  href: "#holland" },
-          { label: "Mục lục ngành", href: "#transfer-analysis" },
+          {
+            label: "Dashboard",
+            href: "#",
+            onClick: (e) => {
+              e.preventDefault();
+              if (actualIsLoggedIn) {
+                const role = localStorage.getItem("role");
+                if (role === "ROLE_ADMIN") {
+                  navigate("/admin/dashboard");
+                } else {
+                  onNavigateToPortalTab?.("dashboard");
+                }
+              } else {
+                openLogin();
+              }
+            }
+          },
+          {
+            label: "Trang chủ",
+            href: "#",
+            active: true,
+            onClick: (e) => {
+              e.preventDefault();
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+          },
+
+          {
+            label: "Mục lục ngành",
+            href: "#",
+            onClick: (e) => {
+              e.preventDefault();
+              navigate("/major-catalog");
+            },
+          },
         ]}
-        ctaLabel={isLoggedIn ? "Dashboard" : "Đăng nhập"}
-        onCtaClick={() =>
-          isLoggedIn ? onNavigateToPortalTab?.("dashboard") : openLogin()
-        }
+        ctaLabel={actualIsLoggedIn ? "Dashboard" : "Đăng nhập"}
+        onCtaClick={() => {
+          if (actualIsLoggedIn) {
+            const role = localStorage.getItem("role");
+            if (role === "ROLE_ADMIN") {
+              navigate("/admin/dashboard");
+            } else {
+              onNavigateToPortalTab?.("dashboard");
+            }
+          } else {
+            openLogin();
+          }
+        }}
+        user={user}
+        onLogoClick={() => {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}
       />
 
       <div className="hp-main">
@@ -314,7 +373,7 @@ export default function Home({
                 Bắt đầu khám phá gợi ý
                 <ArrowRight className="icon-sm" />
               </button>
-              {!isLoggedIn ? (
+              {!actualIsLoggedIn ? (
                 <button
                   onClick={() => openLogin("register")}
                   className="btn btn-lg btn-ghost-blue"
@@ -324,7 +383,14 @@ export default function Home({
                 </button>
               ) : (
                 <button
-                  onClick={() => onNavigateToPortalTab?.("dashboard")}
+                  onClick={() => {
+                    const role = localStorage.getItem("role");
+                    if (role === "ROLE_ADMIN") {
+                      navigate("/admin/dashboard");
+                    } else {
+                      onNavigateToPortalTab?.("dashboard");
+                    }
+                  }}
                   className="btn btn-lg btn-ghost-blue"
                 >
                   Bảng điều khiển của tôi
@@ -375,7 +441,7 @@ export default function Home({
           <div className="container">
             <div className="hp-feature-grid hp-feature-grid-rev">
 
-              
+
 
               <div className="hp-feature-content reveal">
                 <div className="hp-feature-number hp-num-orange">02</div>
@@ -403,7 +469,7 @@ export default function Home({
                   </button>
                 </div>
               </div>
-<div className="hp-feature-illustration reveal">
+              <div className="hp-feature-illustration reveal">
                 <HollandMock />
               </div>
             </div>
@@ -461,7 +527,7 @@ export default function Home({
           <div className="container">
             <div className="hp-feature-grid hp-feature-grid-rev">
 
-              
+
 
               <div className="hp-feature-content reveal">
                 <div className="hp-feature-number hp-num-indigo">04</div>
@@ -483,9 +549,9 @@ export default function Home({
                   </button>
                 </div>
               </div>
-               <div className="hp-feature-illustration reveal">
+              <div className="hp-feature-illustration reveal">
                 <StudentRoadmapMock />
-              </div>     
+              </div>
             </div>
           </div>
         </section>
