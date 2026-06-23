@@ -536,7 +536,7 @@ export default function MajorCatalog({
                               <span className="spec-card__code">{spec.code}</span>
                               <span className="spec-card__name">{spec.name}</span>
                               <span className="spec-card__count">
-                                {spec.narrowSpecs.length} hướng hẹp
+                                {spec.narrowSpecs.length} CN hẹp
                               </span>
                               <svg
                                 className={`spec-card__chevron${isActive ? ' spec-card__chevron--up' : ''}`}
