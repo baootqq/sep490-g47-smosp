@@ -6,6 +6,7 @@ import RegisterPage from "../pages/auth/RegisterPage";
 import ForgotPasswordPage from "../pages/auth/ForgotPasswordPage";
 import ResetPasswordPage from "../pages/auth/ResetPasswordPage";
 import VerifyEmailPage from "../pages/auth/VerifyEmailPage";
+import AccountPage from "../pages/auth/AccountPage";
 import AdminDashboard from "../pages/admin/AdminDashboard";
 import CmDashboard from "../pages/cm/CmDashboard";
 import StudentDashboard from "../pages/student/StudentDashboard";
@@ -21,6 +22,8 @@ function AppRoutes() {
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route path="/verify-email" element={<VerifyEmailPage />} />
+      <Route path="/settings/account" element={<AccountPage />} />
+      <Route path="/settings" element={<Navigate to="/settings/account" replace />} />
       <Route path="/major-catalog" element={<MajorCatalog />} />
 
       {/* Role-based Protected Dashboards */}

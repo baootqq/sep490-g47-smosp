@@ -11,7 +11,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Menu, X } from 'lucide-react'
 import logoSvg from '../../asset/logo.svg'
-import { logout } from '../../services/authService'
+import { logout, getNotifications, markNotificationAsRead, markAllNotificationsAsRead } from '../../services/authService'
 
 // ─── SVGs ───────────────────────────────────────────────────────────────────
 const IconBell = () => (
@@ -262,14 +262,29 @@ export default function Navbar({
   // Bell & Avatar Dropdown states for logged in user (matching Layout.jsx)
   const [bellOpen, setBellOpen] = useState(false)
   const [avatarOpen, setAvatarOpen] = useState(false)
-  const [notifList, setNotifList] = useState([
-    { id: '1', message: 'Chào mừng bạn quay trở lại với SMOSP!', time: 'Vừa xong', read: false }
-  ])
+  const [notifList, setNotifList] = useState([])
 
   const bellRef = useRef(null)
   const avatarRef = useRef(null)
 
-  const unreadCount = notifList.filter((n) => !n.read).length
+  const unreadCount = notifList.filter((n) => !n.isRead).length
+
+  // Fetch notifications
+  useEffect(() => {
+    if (!user) return;
+    const fetchNotifs = async () => {
+      try {
+        const data = await getNotifications();
+        setNotifList(data);
+      } catch (err) {
+        console.error("Failed to fetch notifications:", err);
+      }
+    };
+    fetchNotifs();
+    // Poll every 30 seconds for new notifications
+    const interval = setInterval(fetchNotifs, 30000);
+    return () => clearInterval(interval);
+  }, [user]);
 
   // Click outside to close dropdowns
   useEffect(() => {
@@ -281,8 +296,39 @@ export default function Navbar({
     return () => document.removeEventListener('mousedown', handler)
   }, [])
 
-  const markAllRead = () => setNotifList((prev) => prev.map((n) => ({ ...n, read: true })))
-  const markRead = (id) => setNotifList((prev) => prev.map((n) => n.id === id ? { ...n, read: true } : n))
+  const markAllRead = async () => {
+    try {
+      await markAllNotificationsAsRead();
+      setNotifList((prev) => prev.map((n) => ({ ...n, isRead: true })));
+    } catch (err) {
+      console.error("Failed to mark all as read:", err);
+    }
+  };
+
+  const markRead = async (id) => {
+    try {
+      await markNotificationAsRead(id);
+      setNotifList((prev) => prev.map((n) => n.id === id ? { ...n, isRead: true } : n));
+    } catch (err) {
+      console.error("Failed to mark notification as read:", err);
+    }
+  };
+
+  const timeAgo = (dateStr) => {
+    if (!dateStr) return "";
+    try {
+      const seconds = Math.floor((new Date() - new Date(dateStr)) / 1000);
+      if (seconds < 60) return "Vừa xong";
+      const minutes = Math.floor(seconds / 60);
+      if (minutes < 60) return `${minutes} phút trước`;
+      const hours = Math.floor(minutes / 60);
+      if (hours < 24) return `${hours} giờ trước`;
+      const days = Math.floor(hours / 24);
+      return `${days} ngày trước`;
+    } catch (e) {
+      return "";
+    }
+  };
 
   const handleLogout = async () => {
     await logout()
@@ -375,13 +421,15 @@ export default function Navbar({
                           notifList.map((n) => (
                             <div
                               key={n.id}
-                              className={`smosp-notif-item${n.read ? '' : ' unread'}`}
+                              className={`smosp-notif-item${n.isRead ? '' : ' unread'}`}
                               onClick={() => markRead(n.id)}
                             >
-                              {!n.read && <span className="smosp-notif-dot" />}
+                              {!n.isRead && <span className="smosp-notif-dot" />}
                               <div className="smosp-notif-body">
-                                <p className="smosp-notif-msg">{n.message}</p>
-                                <span className="smosp-notif-time">{n.time}</span>
+                                <p className="smosp-notif-msg">
+                                  <strong>{n.title}</strong>: {n.body}
+                                </p>
+                                <span className="smosp-notif-time">{timeAgo(n.createdAt)}</span>
                               </div>
                             </div>
                           ))

@@ -67,3 +67,33 @@ export const resendVerifyEmail = async (email) => {
   const response = await api.post("/auth/verify-email/resend", { email });
   return response.data;
 };
+
+export const getProfile = async () => {
+  const response = await api.get("/me");
+  return response.data;
+};
+
+export const updateProfilePreferences = async (displayName, notifEnabled) => {
+  const response = await api.put("/me/preferences", { displayName, notifEnabled });
+  return response.data;
+};
+
+export const changePassword = async (oldPassword, newPassword) => {
+  const response = await api.put("/auth/password/change", { oldPassword, newPassword });
+  return response.data;
+};
+
+export const getNotifications = async () => {
+  const response = await api.get("/notifications");
+  return response.data;
+};
+
+export const markNotificationAsRead = async (id) => {
+  const response = await api.patch(`/notifications/${id}/read`);
+  return response.data;
+};
+
+export const markAllNotificationsAsRead = async () => {
+  const response = await api.patch("/notifications/read-all");
+  return response.data;
+};
