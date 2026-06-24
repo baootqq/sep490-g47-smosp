@@ -8,6 +8,7 @@ import {
   BookOpen, BarChart2, Zap
 } from "lucide-react";
 import Navbar from "../components/common/Navbar";
+import Footer from "../components/common/Footer";
 import "./Homepage.css";
 import Majorcatalog from "./guest/Majorcatalog.jsx";
 
@@ -344,6 +345,7 @@ export default function Home({
             openLogin();
           }
         }}
+        onRegisterClick={() => openLogin("register")}
         user={user}
         onLogoClick={() => {
           window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -559,15 +561,7 @@ export default function Home({
       </div>
 
       {/* ── Footer ── */}
-      <footer className="hp-footer">
-        <div className="hp-footer-inner">
-          <div className="hp-footer-brand">
-            <Compass className="icon-sm c-orange" />
-            <span>SMOSP</span>
-          </div>
-          <span className="hp-footer-tagline">Dành riêng cho sinh viên Đại học FPT</span>
-        </div>
-      </footer>
+      <Footer />
 
     </div>
   );

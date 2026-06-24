@@ -32,18 +32,19 @@ const NAVBAR_CSS = `
     box-shadow: 0 2px 16px rgba(3, 78, 162, 0.25);
   }
   .smosp-nav-inner {
-    max-width: 1200px;
-    margin: 0 auto;
+    max-width: 100%;
     padding: 0 48px;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    gap: 32px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  box-sizing: border-box;
   }
   .smosp-logo {
     display: flex;
-    align-items: flex-end;
-    gap: 3px;
+    align-items: center;
+    gap: 8px;
     font-size: 20px;
     font-weight: 800;
     color: #fff;
@@ -55,23 +56,30 @@ const NAVBAR_CSS = `
     padding: 0;
     font-family: 'Be Vietnam Pro', sans-serif;
   }
-  .smosp-logo-dot {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: #F37021;
-    margin-bottom: 4px;
-    flex-shrink: 0;
+  .smosp-logo-img {
+    height: 32px;
+    width: auto;
+    display: block;
+  }
+  .smosp-logo-text {
+    font-size: 20px;
+    font-weight: 800;
+    color: #fff;
+    font-family: 'Be Vietnam Pro', sans-serif;
   }
   .smosp-nav-links {
     display: flex;
-    gap: 4px;
-    flex: 1;
+    justify-content: center;
+    align-items: center;
+    gap: 200px;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
   }
   .smosp-nav-link {
     color: rgba(255, 255, 255, 0.72);
-    font-size: 14px;
-    font-weight: 500;
+    font-size: 18px;
+    font-weight: 600;
     padding: 6px 14px;
     border-radius: 6px;
     background: none;
@@ -105,6 +113,9 @@ const NAVBAR_CSS = `
     cursor: pointer;
     font-family: 'Be Vietnam Pro', sans-serif;
     white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
   .smosp-nav-cta:hover {
     background: #D4580A;
@@ -112,6 +123,38 @@ const NAVBAR_CSS = `
   }
   .smosp-nav-cta:active {
     transform: translateY(0);
+  }
+  .smosp-nav-btn-secondary {
+    background: transparent;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    height: 38px;
+    padding: 0 20px;
+    border: 1.5px solid rgba(255, 255, 255, 0.4);
+    border-radius: 10px;
+    transition: background 150ms ease, border-color 150ms ease, transform 150ms ease;
+    flex-shrink: 0;
+    cursor: pointer;
+    font-family: 'Be Vietnam Pro', sans-serif;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .smosp-nav-btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: #fff;
+    transform: translateY(-1px);
+  }
+  .smosp-nav-btn-secondary:active {
+    transform: translateY(0);
+  }
+  .smosp-nav-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
   }
   /* Avatar */
   .smosp-nav-avatar {
@@ -192,6 +235,8 @@ export default function Navbar({
   links = [],
   ctaLabel = 'Bắt Đầu',
   onCtaClick,
+  registerLabel = 'Đăng ký',
+  onRegisterClick,
   user = null,
   onLogoClick,
 }) {
@@ -219,13 +264,14 @@ export default function Navbar({
         <div className="smosp-nav-inner">
 
           {/* Logo */}
+          {/* Logo */}
           <button
             className="smosp-logo"
             onClick={onLogoClick}
-            aria-label={`${logo} — về trang chủ`}
+            aria-label="SMOSP — về trang chủ"
           >
-            {logo}
-            <span className="smosp-logo-dot" aria-hidden="true" />
+            <img src={logoSvg} alt="SMOSP Logo" className="smosp-logo-img" />
+            <span className="smosp-logo-text">SMOSP</span>
           </button>
 
           {/* Desktop links */}
@@ -244,7 +290,7 @@ export default function Navbar({
           </div>
 
           {/* Right area */}
-          <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0 }}>
+          <div className="smosp-nav-right">
 
             {/* Avatar */}
             {user && (
@@ -262,8 +308,17 @@ export default function Navbar({
               </div>
             )}
 
-            {/* CTA */}
-            {!user && (
+            {/* Auth Buttons / CTA */}
+            {!user ? (
+              <>
+                <button className="smosp-nav-btn-secondary" onClick={onCtaClick}>
+                  {ctaLabel}
+                </button>
+                <button className="smosp-nav-cta" onClick={onRegisterClick}>
+                  {registerLabel}
+                </button>
+              </>
+            ) : (
               <button className="smosp-nav-cta" onClick={onCtaClick}>
                 {ctaLabel}
               </button>
@@ -297,13 +352,20 @@ export default function Navbar({
               </a>
             ))}
             {!user && (
-              <div style={{ padding: '8px 20px 0' }}>
+              <div style={{ padding: '8px 20px 0', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 <button
-                  className="smosp-nav-cta"
+                  className="smosp-nav-btn-secondary"
                   style={{ width: '100%', justifyContent: 'center' }}
                   onClick={() => { onCtaClick?.(); setMenuOpen(false) }}
                 >
                   {ctaLabel}
+                </button>
+                <button
+                  className="smosp-nav-cta"
+                  style={{ width: '100%', justifyContent: 'center' }}
+                  onClick={() => { onRegisterClick?.(); setMenuOpen(false) }}
+                >
+                  {registerLabel}
                 </button>
               </div>
             )}

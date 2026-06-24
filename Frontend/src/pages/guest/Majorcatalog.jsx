@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 // Dùng chung Navbar với Homepage — điều chỉnh path nếu khác
 import Navbar from "../../components/common/Navbar";
+import Footer from "../../components/common/Footer";
 
 import './Majorcatalog.css';
 import { Link, useNavigate } from "react-router-dom";
@@ -362,6 +363,7 @@ export default function MajorCatalog({
             openLogin();
           }
         }}
+        onRegisterClick={() => openLogin("register")}
         user={user}
         onLogoClick={() => navigate("/")}
       />
@@ -609,8 +611,8 @@ export default function MajorCatalog({
         </div>
       </main>
 
-      {/* ── Footer spacer ── */}
-      <div className="catalog-footer-space" />
+      {/* ── Footer ── */}
+      <Footer />
     </div>
   );
 }
