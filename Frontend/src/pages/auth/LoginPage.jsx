@@ -25,21 +25,25 @@ function LoginPage() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleLoginSuccess = (data) => {
+  const handleLoginSuccess = (data, isGoogle = false) => {
     localStorage.setItem("accessToken", data.accessToken);
     localStorage.setItem("refreshToken", data.refreshToken);
     localStorage.setItem("username", data.username);
     const role = data.roles?.length > 0 ? data.roles[0] : null;
     if (role) localStorage.setItem("role", role);
 
-    if (role === "ROLE_ADMIN") {
-      navigate("/admin/dashboard");
-    } else if (role === "ROLE_CONTENT_MANAGER") {
-      navigate("/cm/dashboard");
-    } else if (role === "ROLE_STUDENT") {
-      navigate("/student/dashboard");
-    } else {
+    if (!isGoogle) {
       navigate("/");
+    } else {
+      if (role === "ROLE_ADMIN") {
+        navigate("/admin/dashboard");
+      } else if (role === "ROLE_CONTENT_MANAGER") {
+        navigate("/cm/dashboard");
+      } else if (role === "ROLE_STUDENT") {
+        navigate("/student/dashboard");
+      } else {
+        navigate("/");
+      }
     }
   };
 
@@ -50,7 +54,7 @@ function LoginPage() {
       const result = await signInWithPopup(auth, googleProvider);
       const idToken = await result.user.getIdToken();
       const data = await googleLogin(idToken);
-      handleLoginSuccess(data);
+      handleLoginSuccess(data, true);
     } catch (err) {
       console.error("Google login error:", err);
       setError(err.response?.data?.message || err.message || "Đăng nhập Google thất bại.");
