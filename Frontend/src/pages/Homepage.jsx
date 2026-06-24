@@ -7,8 +7,8 @@ import {
   GraduationCap, GitCompare, Check, AlertTriangle, ListOrdered,
   BookOpen, BarChart2, Zap
 } from "lucide-react";
-import Navbar from "../components/common/Navbar";
-import Footer from "../components/common/Footer";
+import Navbar from "../components/common/Navbar.jsx";
+import Footer from "../components/common/Footer.jsx";
 import "./Homepage.css";
 import Majorcatalog from "./guest/Majorcatalog.jsx";
 
