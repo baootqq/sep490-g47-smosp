@@ -37,7 +37,7 @@ public class DataSeeder implements CommandLineRunner {
             userAccountRepository.save(UserAccount.builder()
                     .username("admin")
                     .email("admin@smosp.com")
-                    .passwordHash(passwordEncoder.encode("admin123"))
+                    .passwordHash(passwordEncoder.encode("12345678"))
                     .role(adminRole)
                     .build());
             log.info("Seeded admin user");
@@ -49,7 +49,7 @@ public class DataSeeder implements CommandLineRunner {
             userAccountRepository.save(UserAccount.builder()
                     .username("contentmanager")
                     .email("contentmanager@smosp.com")
-                    .passwordHash(passwordEncoder.encode("cm123"))
+                    .passwordHash(passwordEncoder.encode("12345678"))
                     .role(cmRole)
                     .build());
             log.info("Seeded content manager user");
