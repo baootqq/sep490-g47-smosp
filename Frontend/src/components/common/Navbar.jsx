@@ -17,6 +17,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { Menu, X } from 'lucide-react'
+import logoSvg from '../../asset/logo.svg'
 
 /* ── CSS ─────────────────────────────────────────────────── */
 
@@ -187,7 +188,7 @@ const NAVBAR_CSS = `
 /* ── Component ───────────────────────────────────────────── */
 
 export default function Navbar({
-  logo = 'OrientFPT',
+  logo = '',
   links = [],
   ctaLabel = 'Bắt Đầu',
   onCtaClick,
@@ -326,7 +327,7 @@ export default function Navbar({
  *
  * // Chưa đăng nhập
  * <Navbar
- *   logo="OrientFPT"
+ *   logo=""
  *   links={NAV_LINKS}
  *   ctaLabel="Bắt Đầu"
  *   onCtaClick={() => navigate('/register')}
@@ -335,7 +336,7 @@ export default function Navbar({
  *
  * // Đã đăng nhập
  * <Navbar
- *   logo="OrientFPT"
+ *   logo=""
  *   links={NAV_LINKS}
  *   user={{ name: 'Nguyễn Văn A' }}
  *   onLogoClick={() => navigate('/')}
