@@ -7,7 +7,10 @@ import ForgotPasswordPage from "../pages/auth/ForgotPasswordPage";
 import ResetPasswordPage from "../pages/auth/ResetPasswordPage";
 import VerifyEmailPage from "../pages/auth/VerifyEmailPage";
 import AdminDashboard from "../pages/admin/AdminDashboard";
+import CmDashboard from "../pages/cm/CmDashboard";
+import StudentDashboard from "../pages/student/StudentDashboard";
 import MajorCatalog from "../pages/guest/Majorcatalog";
+import ProtectedRoute from "./ProtectedRoute";
 
 function AppRoutes() {
   return (
@@ -19,9 +22,32 @@ function AppRoutes() {
       <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route path="/verify-email" element={<VerifyEmailPage />} />
       <Route path="/major-catalog" element={<MajorCatalog />} />
-      
-      {/* Dashboard Admin */}
-      <Route path="/admin/dashboard" element={<AdminDashboard />} />
+
+      {/* Role-based Protected Dashboards */}
+      <Route 
+        path="/admin/dashboard" 
+        element={
+          <ProtectedRoute allowedRoles={["ROLE_ADMIN"]}>
+            <AdminDashboard />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/cm/dashboard" 
+        element={
+          <ProtectedRoute allowedRoles={["ROLE_CONTENT_MANAGER"]}>
+            <CmDashboard />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/student/dashboard" 
+        element={
+          <ProtectedRoute allowedRoles={["ROLE_STUDENT"]}>
+            <StudentDashboard />
+          </ProtectedRoute>
+        } 
+      />
     </Routes>
   );
 }

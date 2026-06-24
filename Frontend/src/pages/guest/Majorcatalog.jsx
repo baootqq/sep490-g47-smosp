@@ -247,6 +247,23 @@ export default function MajorCatalog({
   const username = localStorage.getItem("username");
   const user = isLoggedIn && username ? { name: username } : null;
 
+  const handleDashboardRedirect = () => {
+    if (isLoggedIn) {
+      const role = localStorage.getItem("role");
+      if (role === "ROLE_ADMIN") {
+        navigate("/admin/dashboard");
+      } else if (role === "ROLE_CONTENT_MANAGER") {
+        navigate("/cm/dashboard");
+      } else if (role === "ROLE_STUDENT") {
+        navigate("/student/dashboard");
+      } else {
+        navigate("/");
+      }
+    } else {
+      openLogin();
+    }
+  };
+
   const [filterMajor, setFilterMajor] = useState('');
   const [filterSpec, setFilterSpec] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -321,16 +338,7 @@ export default function MajorCatalog({
             href: "#",
             onClick: (e) => {
               e.preventDefault();
-              if (isLoggedIn) {
-                const role = localStorage.getItem("role");
-                if (role === "ROLE_ADMIN") {
-                  navigate("/admin/dashboard");
-                } else {
-                  onNavigateToPortalTab?.("dashboard") || navigate("/");
-                }
-              } else {
-                openLogin();
-              }
+              handleDashboardRedirect();
             }
           },
           {
@@ -351,18 +359,7 @@ export default function MajorCatalog({
           },
         ]}
         ctaLabel={isLoggedIn ? "Dashboard" : "Đăng nhập"}
-        onCtaClick={() => {
-          if (isLoggedIn) {
-            const role = localStorage.getItem("role");
-            if (role === "ROLE_ADMIN") {
-              navigate("/admin/dashboard");
-            } else {
-              onNavigateToPortalTab?.("dashboard") || navigate("/");
-            }
-          } else {
-            openLogin();
-          }
-        }}
+        onCtaClick={handleDashboardRedirect}
         onRegisterClick={() => openLogin("register")}
         user={user}
         onLogoClick={() => navigate("/")}
