@@ -13,6 +13,8 @@
  */
 
 import React from 'react'
+import { useNavigate } from 'react-router-dom'
+import logoSvg from '../../asset/logo.svg'
 
 const FOOTER_CSS = `
   .smosp-footer-link {
@@ -34,11 +36,66 @@ const FOOTER_CSS = `
 `
 
 export default function Footer({
-  logo = 'OrientFPT',
-  tagline = 'Định hướng nghề nghiệp cho sinh viên FPT University.',
-  columns = [],
-  copyright = `© ${new Date().getFullYear()} OrientFPT · Đồ Án Tốt Nghiệp`,
+  logo = 'SMOSP',
+  tagline = 'Hệ thống định hướng chuyên ngành hẹp cho sinh viên Đại học FPT.',
+  columns = null,
+  copyright = `© ${new Date().getFullYear()} SMOSP · Đồ án tốt nghiệp FPTU`,
 }) {
+  const navigate = useNavigate()
+
+  const defaultColumns = [
+    {
+      heading: 'Tính Năng',
+      links: [
+        { label: 'Trắc nghiệm Holland', href: '/#holland-test' },
+        { label: 'Gợi ý chuyên ngành', href: '/#recommendations' },
+        { label: 'Điều kiện chuyển ngành', href: '/#transfer-rules' },
+        { label: 'Mục lục ngành học', href: '/major-catalog' },
+      ],
+    },
+    {
+      heading: 'Hỗ Trợ',
+      links: [
+        { label: 'Hướng dẫn sử dụng', href: '/#guide' },
+        { label: 'Câu hỏi thường gặp', href: '/#faq' },
+        { label: 'Liên hệ hỗ trợ', href: '/#contact' },
+      ],
+    },
+    {
+      heading: 'Về Dự Án',
+      links: [
+        { label: 'Đại học FPT', href: 'https://fpt.edu.vn' },
+        { label: 'Điều khoản sử dụng', href: '/#terms' },
+        { label: 'Chính sách bảo mật', href: '/#privacy' },
+      ],
+    },
+  ]
+
+  const displayColumns = columns || defaultColumns
+
+  const handleLinkClick = (e, link) => {
+    if (link.onClick) {
+      link.onClick(e)
+      return
+    }
+    if (link.href) {
+      if (link.href.startsWith('http')) {
+        // External link, let it navigate normally
+        return
+      }
+      e.preventDefault()
+      if (link.href.includes('#')) {
+        const [path, hash] = link.href.split('#')
+        navigate(path)
+        setTimeout(() => {
+          document.getElementById(hash)?.scrollIntoView({ behavior: 'smooth' })
+        }, 100)
+      } else {
+        navigate(link.href)
+      }
+    }
+  }
+
   return (
     <>
       <style>{FOOTER_CSS}</style>
@@ -60,8 +117,8 @@ export default function Footer({
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: columns.length > 0
-                ? `280px repeat(${columns.length}, 1fr)`
+              gridTemplateColumns: displayColumns.length > 0
+                ? `280px repeat(${displayColumns.length}, 1fr)`
                 : '280px',
               gap: '32px',
               marginBottom: '32px',
@@ -72,8 +129,8 @@ export default function Footer({
               <div
                 style={{
                   display: 'flex',
-                  alignItems: 'flex-end',
-                  gap: '3px',
+                  alignItems: 'center',
+                  gap: '8px',
                   fontSize: '20px',
                   fontWeight: 800,
                   color: '#fff',
@@ -82,18 +139,8 @@ export default function Footer({
                   fontFamily: "'Be Vietnam Pro', sans-serif",
                 }}
               >
-                {logo}
-                <span
-                  aria-hidden="true"
-                  style={{
-                    width: '7px',
-                    height: '7px',
-                    borderRadius: '50%',
-                    background: '#F37021',
-                    marginBottom: '4px',
-                    flexShrink: 0,
-                  }}
-                />
+                <img src={logoSvg} alt="SMOSP Logo" style={{ height: '32px', width: 'auto', display: 'block' }} />
+                <span>SMOSP</span>
               </div>
               <p
                 style={{
@@ -109,7 +156,7 @@ export default function Footer({
             </div>
 
             {/* Link columns */}
-            {columns.map((col) => (
+            {displayColumns.map((col) => (
               <div key={col.heading}>
                 <div
                   style={{
@@ -129,7 +176,7 @@ export default function Footer({
                     <a
                       key={link.label}
                       href={link.href || '#'}
-                      onClick={link.onClick}
+                      onClick={(e) => handleLinkClick(e, link)}
                       className="smosp-footer-link"
                     >
                       {link.label}
