@@ -1,9 +1,11 @@
 import "./LoginRegisterPage.css";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, ChevronRight } from "lucide-react";
 import { login, googleLogin } from "../../services/authService";
+import { auth, googleProvider } from "../../config/firebase";
+import { signInWithPopup } from "firebase/auth";
 import logo from "../../asset/logo.svg";
 
 const GoogleLogo = () => (
@@ -41,29 +43,21 @@ function LoginPage() {
     }
   };
 
-  useEffect(() => {
-    const init = () => {
-      if (window.google) {
-        google.accounts.id.initialize({
-          client_id: "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com",
-          callback: async (res) => {
-            try {
-              setError(""); setLoading(true);
-              handleLoginSuccess(await googleLogin(res.credential));
-            } catch (err) {
-              setError(err.response?.data?.message || "Đăng nhập Google thất bại.");
-            } finally { setLoading(false); }
-          },
-        });
-        google.accounts.id.renderButton(
-          document.getElementById("google-sdk-div"),
-          { theme: "outline", size: "large" }
-        );
-      }
-    };
-    const t = setInterval(() => { if (window.google) { init(); clearInterval(t); } }, 100);
-    return () => clearInterval(t);
-  }, []);
+  const handleGoogleLogin = async () => {
+    try {
+      setError("");
+      setLoading(true);
+      const result = await signInWithPopup(auth, googleProvider);
+      const idToken = await result.user.getIdToken();
+      const data = await googleLogin(idToken);
+      handleLoginSuccess(data);
+    } catch (err) {
+      console.error("Google login error:", err);
+      setError(err.response?.data?.message || err.message || "Đăng nhập Google thất bại.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -113,11 +107,10 @@ function LoginPage() {
             </h1>
             {/* Google */}
             <button className="lp-google-btn" type="button"
-              onClick={() => window.google?.accounts.id.prompt()}
+              onClick={handleGoogleLogin}
               disabled={loading}>
               <GoogleLogo /> Đăng nhập với Google
             </button>
-            <div id="google-sdk-div" style={{ display: "none" }} />
 
             <div className="lp-divider">Hoặc</div>
 
