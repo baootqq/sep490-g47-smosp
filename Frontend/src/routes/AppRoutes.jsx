@@ -9,6 +9,7 @@ import VerifyEmailPage from "../pages/auth/VerifyEmailPage";
 import AccountPage from "../pages/auth/AccountPage";
 import AdminDashboard from "../pages/admin/AdminDashboard";
 import CmDashboard from "../pages/cm/CmDashboard";
+import CmCatalogPage from "../pages/cm/CmCatalogPage";
 import StudentDashboard from "../pages/student/StudentDashboard";
 import MajorCatalog from "../pages/guest/Majorcatalog";
 import ProtectedRoute from "./ProtectedRoute";
@@ -40,6 +41,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute allowedRoles={["ROLE_CONTENT_MANAGER"]}>
             <CmDashboard />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/cm/catalog" 
+        element={
+          <ProtectedRoute allowedRoles={["ROLE_CONTENT_MANAGER"]}>
+            <CmCatalogPage />
           </ProtectedRoute>
         } 
       />
