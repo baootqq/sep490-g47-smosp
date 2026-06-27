@@ -34,6 +34,11 @@ spring:
           starttls:
             enable: true
 
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
+
 jwt:
   secret: "eW91ci0yNTYtYml0LXNlY3JldC1rZXktY2hhbmdlLXRoaXMtaW4tcHJvZHVjdGlvbi1tdXN0LWJlLWxvbmctZW5vdWdo"
   expiration: 86400000
@@ -52,3 +57,9 @@ logging:
 
 app:
   base-url: http://localhost:8080
+  frontend-url: http://localhost:5173
+
+cloudinary:
+  cloud-name: ${CLOUDINARY_CLOUD_NAME:frdmazap}
+  api-key: ${CLOUDINARY_API_KEY:489871719785675}
+  api-secret: ${CLOUDINARY_API_SECRET:27mDfZb5s-TGaAhtc5ckfpGbMqM}

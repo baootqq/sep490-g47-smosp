@@ -12,11 +12,11 @@ public class EmailService {
 
     private final JavaMailSender mailSender;
 
-    @Value("${app.base-url}")
-    private String baseUrl;
+    @Value("${app.frontend-url}")
+    private String frontendUrl;
 
     public void sendVerificationEmail(String toEmail, String token) {
-        String link = baseUrl + "/api/auth/verify-email?token=" + token;
+        String link = frontendUrl + "/verify-email?token=" + token;
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(toEmail);
         message.setSubject("[SMOSP] Xác minh email đăng ký");
@@ -26,7 +26,7 @@ public class EmailService {
     }
 
     public void sendPasswordResetEmail(String toEmail, String token) {
-        String link = baseUrl + "/api/auth/reset-password?token=" + token;
+        String link = frontendUrl + "/reset-password?token=" + token;
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(toEmail);
         message.setSubject("[SMOSP] Đặt lại mật khẩu");

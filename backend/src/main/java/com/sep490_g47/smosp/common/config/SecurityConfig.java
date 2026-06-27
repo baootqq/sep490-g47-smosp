@@ -50,6 +50,7 @@ public class SecurityConfig {
                                 "/api-docs/**",
                                 "/v3/api-docs/**"
                         ).permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/majors").permitAll()
                         .requestMatchers(
                                 "/api/auth/logout",
                                 "/api/auth/password/change",
