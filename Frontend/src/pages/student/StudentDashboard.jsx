@@ -424,7 +424,7 @@ export default function StudentDashboard() {
                   </div>
                 ))}
               </div>
-              <button className="sd-btn-outline" onClick={() => navigate('/student/holland')}>
+              <button className="sd-btn-outline" onClick={() => navigate('/student/holland/test')}>
                 Làm lại đánh giá
               </button>
             </div>

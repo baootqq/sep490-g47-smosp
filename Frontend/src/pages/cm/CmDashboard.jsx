@@ -539,7 +539,7 @@ export default function CmDashboard() {
                 {d.alerts.hollandDimBelowMin && (
                   <button
                     className="cm-alert-row cm-alert-row--warning"
-                    onClick={() => navigate('/cm/question-bank')}
+                    onClick={() => navigate('/cm/questions')}
                   >
                     <span className="cm-alert-row__dot" />
                     <span className="cm-alert-row__text">
@@ -550,7 +550,7 @@ export default function CmDashboard() {
                 )}
               </div>
 
-              <button className="cm-btn-fill-blue" onClick={() => navigate('/cm/question-bank')}>
+              <button className="cm-btn-fill-blue" onClick={() => navigate('/cm/questions')}>
                 Quản lý câu hỏi
               </button>
             </div>
