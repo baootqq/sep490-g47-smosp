@@ -9,4 +9,8 @@ import java.util.UUID;
 @Repository
 public interface NarrowSpecRepository extends JpaRepository<NarrowSpecialization, UUID> {
     boolean existsBySpecializationIdAndIsPublishedTrue(UUID specializationId);
+    boolean existsBySpecialization_Major_IdAndIsPublishedTrue(UUID majorId);
+    long countBySpecializationId(UUID specializationId);
+    boolean existsByCode(String code);
+    boolean existsByCodeAndIdNot(String code, UUID id);
 }

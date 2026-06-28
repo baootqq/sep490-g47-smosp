@@ -5,6 +5,7 @@ import com.sep490_g47.smosp.major.dto.MajorResponse;
 import com.sep490_g47.smosp.major.dto.StatusUpdateRequest;
 import com.sep490_g47.smosp.major.entity.Major;
 import com.sep490_g47.smosp.major.repository.MajorRepository;
+import com.sep490_g47.smosp.narrowspec.repository.NarrowSpecRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -26,12 +27,17 @@ import java.util.stream.Collectors;
 public class MajorServiceImpl implements MajorService {
 
     private final MajorRepository majorRepository;
+    private final NarrowSpecRepository narrowSpecRepository;
 
     @Override
     @Transactional
     public MajorResponse createMajor(MajorRequest request) {
         if (majorRepository.existsByCode(request.getCode())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Major code already exists");
+        }
+
+        if (majorRepository.existsByName(request.getName())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Major name already exists");
         }
 
         Major major = Major.builder()
@@ -62,6 +68,10 @@ public class MajorServiceImpl implements MajorService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Major code already exists for another record");
         }
 
+        if (majorRepository.existsByNameAndIdNot(request.getName(), id)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Major name already exists for another record");
+        }
+
         if (!Objects.equals(request.getTuitionPerTerm(), major.getTuitionPerTerm()) ||
             !Objects.equals(request.getPricePerCredit(), major.getPricePerCredit())) {
             major.setTuitionUpdatedAt(LocalDateTime.now());
@@ -86,6 +96,13 @@ public class MajorServiceImpl implements MajorService {
 
         if (Objects.equals(major.getIsActive(), request.getIsActive())) {
             return mapToResponse(major);
+        }
+
+        if (!request.getIsActive()) {
+            boolean hasActiveChildren = narrowSpecRepository.existsBySpecialization_Major_IdAndIsPublishedTrue(id);
+            if (hasActiveChildren) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot deactivate Major because it has active NarrowSpecializations");
+            }
         }
 
         major.setIsActive(request.getIsActive());

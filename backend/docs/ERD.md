@@ -1,10 +1,9 @@
 // ============================================================
 // SMOSP ERD v5 — DBML
-// Cập nhật: 24/06/2026
+// Cập nhật: 23/06/2026
 //
 // THAY ĐỔI:
 // [FIX-15] Update account user và notification.
-// Them các trường description và image url cho spec và major 
 // ============================================================
 
 // ── CLUSTER 1: AUTH & USER ──────────────────────────────────
@@ -84,12 +83,13 @@ Table content_error_report {
 // ── CLUSTER 2: CATALOG & CURRICULUM ────────────────────────
 
 
+
 Table major {
   id                uuid    [pk]
   code              varchar [not null, unique]
   name              varchar [not null]
   description       text
-  image_url         varchar [note: 'Firebase Storage URL']
+  image_url         varchar [note: 'Cloudinary storage URL']
   is_active         boolean [not null, default: true]
   tuition_per_term  decimal [note: 'VNĐ — ước tính học phí/kỳ, CM cập nhật; null nếu chưa cấu hình']
   price_per_credit  decimal [note: 'VNĐ — giá học lại/tín chỉ, CM cập nhật; null nếu chưa cấu hình']
@@ -102,10 +102,11 @@ Table specialization {
   code        varchar [not null, unique]
   name        varchar [not null]
   description text
-  image_url   varchar [note: 'Firebase Storage URL']
+  image_url   varchar [note: 'Cloudinary storage URL']
   alpha_base  decimal [not null, default: 0.70, note: 'init default for new narrow_spec_weight_config; CM override per NS']
   is_active   boolean [not null, default: true]
 }
+
 
 Table narrow_spec {
   id                uuid      [pk]
@@ -115,6 +116,16 @@ Table narrow_spec {
   description       text
   is_published      boolean   [not null, default: false]
   published_at      timestamp
+}
+
+Table course {
+  id                uuid    [pk]
+  code              varchar [not null, unique]
+  name              varchar [not null]
+  credits           int     [not null]
+  description       text
+  counts_toward_gpa boolean [not null, default: true]
+  is_active         boolean [not null, default: true]
 }
 
 Table spec_course {
@@ -129,24 +140,12 @@ Table spec_course {
   }
 }
 
-Table course {
-  id                uuid    [pk]
-  code              varchar [not null, unique]
-  name              varchar [not null]
-  credits           int     [not null]
-  category          varchar [not null, note: 'GENERAL / CORE / SPECIALIZATION / OJT']
-  description       text
-  counts_toward_gpa boolean [not null, default: true, note: 'false = OJT/GDQP/Vovinam etc — BR-31']
-  is_active         boolean [not null, default: true]
-}
-
 Table ns_course {
   id             uuid    [pk]
   narrow_spec_id uuid    [not null, ref: > narrow_spec.id]
   course_id      uuid    [not null, ref: > course.id]
   term_order     int     [not null]
-  course_type    varchar [not null, note: 'SHARED / SPECIALIZED']
-
+  
   indexes {
     (narrow_spec_id, course_id) [unique]
   }
@@ -167,7 +166,7 @@ Table learning_resource {
   course_id     uuid      [not null, ref: > course.id]
   title         varchar   [not null]
   url           text      [not null]
-  resource_type varchar   [not null, note: 'VIDEO / ARTICLE / DOCS / EXERCISE']
+  resource_type varchar   [not null, note: 'LINK/ ARTICLE / DOCS / EXERCISE']
   display_order int       [not null, default: 0]
   created_at    timestamp [not null, default: `now()`]
 }

@@ -10,6 +10,8 @@ import java.util.UUID;
 public interface MajorRepository extends JpaRepository<Major, UUID> {
     boolean existsByCode(String code);
     boolean existsByCodeAndIdNot(String code, UUID id);
+    boolean existsByName(String name);
+    boolean existsByNameAndIdNot(String name, UUID id);
     java.util.Optional<Major> findByCodeIgnoreCase(String code);
     java.util.List<Major> findByIsActiveTrueOrderByCodeAsc();
     java.util.List<Major> findAllByOrderByCodeAsc();
