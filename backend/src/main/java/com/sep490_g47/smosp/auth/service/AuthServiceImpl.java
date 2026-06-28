@@ -207,8 +207,13 @@ public class AuthServiceImpl implements AuthService {
                 .orElseGet(() -> {
                     Role studentRole = roleRepository.findByName("ROLE_STUDENT")
                             .orElseThrow(() -> new AuthBusinessException("ROLE_STUDENT not initialized"));
+                    String name = decodedToken.getName();
+                    if (name == null || name.trim().isEmpty()) {
+                        name = "Student";
+                    }
                     UserAccount newUser = UserAccount.builder()
                             .email(userEmail)
+                            .displayName(name)
                             .status("ACTIVE")
                             .role(studentRole)
                             .failedLoginAttempts(0)

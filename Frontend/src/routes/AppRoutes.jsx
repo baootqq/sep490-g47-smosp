@@ -11,6 +11,7 @@ import AdminDashboard from "../pages/admin/AdminDashboard";
 import CmDashboard from "../pages/cm/CmDashboard";
 import HollandQuestionPage from "../pages/cm/HollandQuestionPage";
 import HollandScoringWeightPage from "../pages/cm/HollandScoringWeightPage";
+import CmCatalogPage from "../pages/cm/CmCatalogPage";
 import StudentDashboard from "../pages/student/StudentDashboard";
 import HollandResultPage from "../pages/student/HollandResultPage";
 import HollandTestPage from "../pages/student/HollandTestPage";
@@ -60,6 +61,10 @@ function AppRoutes() {
         element={
           <ProtectedRoute allowedRoles={["ROLE_CONTENT_MANAGER"]}>
             <HollandScoringWeightPage />
+        path="/cm/catalog" 
+        element={
+          <ProtectedRoute allowedRoles={["ROLE_CONTENT_MANAGER"]}>
+            <CmCatalogPage />
           </ProtectedRoute>
         } 
       />
