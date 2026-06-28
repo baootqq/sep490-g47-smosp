@@ -2,20 +2,31 @@ package com.sep490_g47.smosp.specialization.service;
 
 import com.sep490_g47.smosp.major.entity.Major;
 import com.sep490_g47.smosp.major.repository.MajorRepository;
+import com.sep490_g47.smosp.specialization.dto.SpecCourseRequest;
+import com.sep490_g47.smosp.specialization.dto.SpecCourseResponse;
 import com.sep490_g47.smosp.specialization.dto.SpecializationRequest;
 import com.sep490_g47.smosp.specialization.dto.SpecializationResponse;
 import com.sep490_g47.smosp.specialization.dto.StatusUpdateRequest;
+import com.sep490_g47.smosp.specialization.entity.SpecCourse;
 import com.sep490_g47.smosp.specialization.entity.Specialization;
+import com.sep490_g47.smosp.narrowspec.entity.NarrowSpecialization;
+import com.sep490_g47.smosp.narrowspec.entity.NsCourse;
 import com.sep490_g47.smosp.narrowspec.repository.NarrowSpecRepository;
+import com.sep490_g47.smosp.narrowspec.repository.NsCourseRepository;
+import com.sep490_g47.smosp.specialization.repository.SpecCourseRepository;
 import com.sep490_g47.smosp.specialization.repository.SpecializationRepository;
-import lombok.RequiredArgsConstructor;
+import com.sep490_g47.smosp.course.entity.Course;
+import com.sep490_g47.smosp.course.repository.CourseRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +35,9 @@ public class SpecializationServiceImpl implements SpecializationService {
     private final SpecializationRepository specializationRepository;
     private final NarrowSpecRepository narrowSpecRepository;
     private final MajorRepository majorRepository;
+    private final SpecCourseRepository specCourseRepository;
+    private final CourseRepository courseRepository;
+    private final NsCourseRepository nsCourseRepository;
 
     @Override
     @Transactional
@@ -110,6 +124,65 @@ public class SpecializationServiceImpl implements SpecializationService {
         specialization.setIsActive(request.getIsActive());
         specialization = specializationRepository.save(specialization);
         return mapToResponse(specialization);
+    }
+
+    @Override
+    public List<SpecCourseResponse> getSpecializationCourses(UUID specializationId) {
+        if (!specializationRepository.existsById(specializationId)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Specialization not found");
+        }
+        return specCourseRepository.findBySpecializationId(specializationId).stream()
+                .map(this::mapToSpecCourseResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public List<SpecCourseResponse> updateSpecializationCourses(UUID specializationId, List<SpecCourseRequest> requests) {
+        Specialization specialization = specializationRepository.findById(specializationId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Specialization not found"));
+
+        List<UUID> incomingCourseIds = requests.stream().map(SpecCourseRequest::getCourseId).collect(Collectors.toList());
+        if (!incomingCourseIds.isEmpty()) {
+            List<NarrowSpecialization> childNarrowSpecs = narrowSpecRepository.findBySpecializationId(specializationId);
+            if (!childNarrowSpecs.isEmpty()) {
+                List<UUID> narrowSpecIds = childNarrowSpecs.stream().map(NarrowSpecialization::getId).collect(Collectors.toList());
+                List<NsCourse> overlappingCourses = nsCourseRepository.findByNarrowSpecIdInAndCourseIdIn(narrowSpecIds, incomingCourseIds);
+                if (!overlappingCourses.isEmpty()) {
+                    String overlappingCode = overlappingCourses.get(0).getCourse().getCode();
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, 
+                        "Conflict: Course " + overlappingCode + " is already assigned to a child Narrow Specialization. Please remove it from the Narrow Specialization first before promoting it to a Core/General course.");
+                }
+            }
+        }
+
+        specCourseRepository.deleteBySpecializationId(specializationId);
+
+        List<SpecCourse> specCourses = requests.stream().map(req -> {
+            Course course = courseRepository.findById(req.getCourseId())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Course not found with id: " + req.getCourseId()));
+
+            return SpecCourse.builder()
+                    .specialization(specialization)
+                    .course(course)
+                    .termOrder(req.getTermOrder())
+                    .courseType(req.getCourseType())
+                    .build();
+        }).collect(Collectors.toList());
+
+        List<SpecCourse> savedCourses = specCourseRepository.saveAll(specCourses);
+        return savedCourses.stream().map(this::mapToSpecCourseResponse).collect(Collectors.toList());
+    }
+
+    private SpecCourseResponse mapToSpecCourseResponse(SpecCourse specCourse) {
+        return SpecCourseResponse.builder()
+                .id(specCourse.getId())
+                .courseId(specCourse.getCourse().getId())
+                .courseCode(specCourse.getCourse().getCode())
+                .courseName(specCourse.getCourse().getName())
+                .termOrder(specCourse.getTermOrder())
+                .courseType(specCourse.getCourseType())
+                .build();
     }
 
     private SpecializationResponse mapToResponse(Specialization specialization) {

@@ -72,4 +72,12 @@ public class CmCourseController {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(learningResourceService.uploadResource(id, title, resourceType, file, linkUrl));
     }
+
+    @PutMapping("/{id}/resources/order")
+    public ResponseEntity<Void> updateResourceOrder(
+            @PathVariable UUID id,
+            @RequestBody java.util.Map<UUID, Integer> orderMap) {
+        learningResourceService.updateResourceOrder(id, orderMap);
+        return ResponseEntity.ok().build();
+    }
 }

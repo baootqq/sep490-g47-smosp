@@ -1,5 +1,7 @@
 package com.sep490_g47.smosp.specialization.controller;
 
+import com.sep490_g47.smosp.specialization.dto.SpecCourseRequest;
+import com.sep490_g47.smosp.specialization.dto.SpecCourseResponse;
 import com.sep490_g47.smosp.specialization.dto.SpecializationRequest;
 import com.sep490_g47.smosp.specialization.dto.SpecializationResponse;
 import com.sep490_g47.smosp.specialization.dto.StatusUpdateRequest;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -57,5 +60,17 @@ public class CmSpecializationController {
 
         String url = specializationImageService.uploadAndUpdateSpecializationImage(code, file);
         return ResponseEntity.ok(Map.of("url", url));
+    }
+
+    @GetMapping("/{id}/courses")
+    public ResponseEntity<List<SpecCourseResponse>> getSpecializationCourses(@PathVariable UUID id) {
+        return ResponseEntity.ok(specializationService.getSpecializationCourses(id));
+    }
+
+    @PutMapping("/{id}/courses")
+    public ResponseEntity<List<SpecCourseResponse>> updateSpecializationCourses(
+            @PathVariable UUID id,
+            @Valid @RequestBody List<SpecCourseRequest> requests) {
+        return ResponseEntity.ok(specializationService.updateSpecializationCourses(id, requests));
     }
 }

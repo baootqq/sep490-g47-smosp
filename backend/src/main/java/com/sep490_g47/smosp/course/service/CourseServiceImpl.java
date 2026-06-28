@@ -219,6 +219,86 @@ public class CourseServiceImpl implements CourseService, LearningResourceService
         return mapToLearningResourceResponse(resource);
     }
 
+    @Override
+    @Transactional
+    public LearningResourceResponse updateResource(UUID resourceId, String title, ResourceType type, MultipartFile file, String linkUrl, Integer displayOrder) {
+        LearningResource resource = learningResourceRepository.findById(resourceId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Learning resource not found"));
+
+        if (title != null) {
+            resource.setTitle(title);
+        }
+        if (displayOrder != null) {
+            resource.setDisplayOrder(displayOrder);
+        }
+        if (type != null) {
+            resource.setResourceType(type);
+        }
+
+        if (resource.getResourceType() == ResourceType.DOCS || resource.getResourceType() == ResourceType.EXERCISE) {
+            if (file != null && !file.isEmpty()) {
+                String fileName = file.getOriginalFilename();
+                if (fileName == null || !fileName.matches("(?i).*\\.(zip|rar|pdf|doc|docx|xls|xlsx)$")) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, CourseConstants.ERR_INVALID_FILE_FORMAT);
+                }
+                try {
+                    Map params = ObjectUtils.asMap(
+                            "resource_type", "raw",
+                            "folder", "learning_resources",
+                            "use_filename", true,
+                            "unique_filename", true
+                    );
+                    Map uploadResult = cloudinary.uploader().upload(file.getBytes(), params);
+                    resource.setUrl(uploadResult.get("secure_url").toString());
+                } catch (IOException e) {
+                    throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, CourseConstants.ERR_CLOUDINARY_UPLOAD, e);
+                }
+            } else if (linkUrl != null && !linkUrl.isEmpty()) {
+                resource.setUrl(linkUrl);
+            }
+        } else if (resource.getResourceType() == ResourceType.LINK || resource.getResourceType() == ResourceType.ARTICLE) {
+            if (linkUrl != null && !linkUrl.trim().isEmpty()) {
+                if (!linkUrl.matches("^(https?|ftp)://[^\\s/$.?#].[^\\s]*$")) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid URL format");
+                }
+                resource.setUrl(linkUrl);
+            }
+        }
+
+        resource = learningResourceRepository.save(resource);
+        return mapToLearningResourceResponse(resource);
+    }
+
+    @Override
+    @Transactional
+    public void deleteResource(UUID resourceId) {
+        LearningResource resource = learningResourceRepository.findById(resourceId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Learning resource not found"));
+        
+        // Note: For actual cloudinary file deletion, we'd need public_id, but the requirement only states removing entity and optionally file.
+        // We'll proceed with entity deletion.
+        learningResourceRepository.delete(resource);
+    }
+
+    @Override
+    @Transactional
+    public void updateResourceOrder(UUID courseId, Map<UUID, Integer> orderMap) {
+        if (!courseRepository.existsById(courseId)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, CourseConstants.ERR_COURSE_NOT_FOUND);
+        }
+
+        List<LearningResource> resources = learningResourceRepository.findByCourseId(courseId);
+        
+        for (LearningResource res : resources) {
+            Integer newOrder = orderMap.get(res.getId());
+            if (newOrder != null) {
+                res.setDisplayOrder(newOrder);
+            }
+        }
+        
+        learningResourceRepository.saveAll(resources);
+    }
+
     private CourseResponse mapToResponse(Course course) {
         return CourseResponse.builder()
                 .id(course.getId())

@@ -15,4 +15,10 @@ public interface MajorRepository extends JpaRepository<Major, UUID> {
     java.util.Optional<Major> findByCodeIgnoreCase(String code);
     java.util.List<Major> findByIsActiveTrueOrderByCodeAsc();
     java.util.List<Major> findAllByOrderByCodeAsc();
+
+    @org.springframework.data.jpa.repository.Query("SELECT m FROM Major m WHERE LOWER(m.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(m.code) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+    java.util.List<Major> searchByKeyword(@org.springframework.data.repository.query.Param("keyword") String keyword);
+
+    @org.springframework.data.jpa.repository.Query("SELECT m FROM Major m WHERE m.isActive = true AND (LOWER(m.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(m.code) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+    java.util.List<Major> searchByKeywordAndIsActiveTrue(@org.springframework.data.repository.query.Param("keyword") String keyword);
 }

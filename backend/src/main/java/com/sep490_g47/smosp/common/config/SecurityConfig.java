@@ -51,6 +51,10 @@ public class SecurityConfig {
                                 "/v3/api-docs/**"
                         ).permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/majors").permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/majors/*/specializations").permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/specializations/*/narrow-specs").permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/narrow-specs/*").permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/catalog/search").permitAll()
                         .requestMatchers(
                                 "/api/auth/logout",
                                 "/api/auth/password/change",

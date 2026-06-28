@@ -9,7 +9,7 @@ import jakarta.validation.constraints.Size;
 @Data
 public class LoginRequest {
 
-    @NotBlank(message = "Tên đăng nhập không được để trống")
+    @NotBlank(message = "Identifier cannot be blank")
     private String identifier; // email (Student) hoặc username (CM/Admin)
 
     @NotBlank(message = "Password cannot be blank")
