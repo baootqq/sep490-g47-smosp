@@ -273,7 +273,7 @@ AC-17-02: Given the filtered skill and interest list is displayed, when the Stud
 
 AC-17-03: Given a Student has previously declared skills and interests, when the Student returns to the declaration page, then the system displays the previously saved selections pre-checked. *(Student đã khai báo kỹ năng và sở thích trước đó — khi quay lại trang khai báo, hệ thống hiển thị các lựa chọn đã lưu ở trạng thái đã chọn.)*
 
-NAC-17-01: The system must not display skills or interests that are not mapped to the Student's current Major. *(Hệ thống không được hiển thị skill hay interest không được ánh xạ với Major hiện tại của Student.)*
+NAC-17-01: The system must not display skills or interests that are not mapped to the Student's current Specialization. *(Hệ thống không được hiển thị skill hay interest không được ánh xạ với Specialization hiện tại của Student.)*
 
 NAC-17-02: The system must not allow a Student to declare skills or interests that do not exist in the system-managed list. *(Student không được khai báo skill hay interest không tồn tại trong danh sách do Content Manager quản lý.)*
 
@@ -287,7 +287,7 @@ AC-51-03: Given multiple completed courses map to the same skill in the tag map,
 
 NAC-51-01: The system must not automatically add suggested skills to a Student's declared skill list without explicit Student confirmation. *(Hệ thống không được tự động thêm skill được gợi ý vào danh sách đã khai báo của Student mà không có xác nhận rõ ràng.)*
 
-NAC-51-02: The system must not suggest skills that are not mapped to the Student's current Major in the tag map. *(Hệ thống không được gợi ý skill không được ánh xạ với Major hiện tại của Student trong tag map.)*
+NAC-51-02: The system must not suggest skills that are not mapped to the Student's current Specialization in the tag map. *(Hệ thống không được gợi ý skill không được ánh xạ với Specialization hiện tại của Student trong tag map.)*
 
 ## FT-21: Compatibility Score Calculation
 

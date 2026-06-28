@@ -1,14 +1,9 @@
-# SMOSP ERD v5 — DBML Schema Reference
-> Cập nhật: 17/06/2026 | 47 tables, 6 clusters
-
 // ============================================================
 // SMOSP ERD v5 — DBML
-// Cập nhật: 17/06/2026
+// Cập nhật: 23/06/2026
 //
 // THAY ĐỔI:
-// [FIX-15] Holland Test Refactor:
-// - Move `riasec_dimension` to `holland_question`.
-// - Turn `holland_answer_option` into a Master Data table (shared across all questions) per BR-32 Likert scale.
+// [FIX-15] Update account user và notification.
 // ============================================================
 
 // ── CLUSTER 1: AUTH & USER ──────────────────────────────────
@@ -26,6 +21,9 @@ Table user_account {
   username      varchar   [unique, note: 'CM / Admin only — seeded']
   password_hash varchar
   status        varchar   [not null, default: 'ACTIVE', note: 'ACTIVE / INACTIVE']
+  display_name  varchar   [note: 'tên hiển thị trên UI — mọi role; init từ full_name (Student) hoặc username (CM/Admin)']
+  notif_enabled boolean   [not null, default: true, note: 'bật/tắt nhận thông báo — UC-09']
+  fcm_token     varchar   [note: 'Lưu token để push notification từ Firebase']
   created_at    timestamp [not null, default: `now()`]
   updated_at    timestamp [not null, default: `now()`]
 }
@@ -74,39 +72,60 @@ Table notification {
 Table content_error_report {
   id          uuid      [pk]
   reporter_id uuid      [not null, ref: > user_account.id]
-  entity_type varchar   [not null, note: 'course / resource / narrow_spec']
+  entity_type varchar   [not null, note: 'course / resource / narrow_spec / specialization / roadmap / major ']
   entity_id   uuid      [not null]
   description text      [not null]
   status      varchar   [not null, default: 'PENDING', note: 'PENDING / RESOLVED / DISMISSED']
+  processing_note text      [note: 'Ghi chú của Content Manager khi xử lý báo cáo'] 
   created_at  timestamp [not null, default: `now()`]
 }
 
 // ── CLUSTER 2: CATALOG & CURRICULUM ────────────────────────
 
+
+
 Table major {
-  id               uuid    [pk]
-  code             varchar [not null, unique]
-  name             varchar [not null]
-  discipline_group varchar [not null, note: 'IT / Business / Languages / Law / DigitalArt — sets alpha_base default for new narrow_spec_weight_config']
-  is_active        boolean [not null, default: true]
+  id                uuid    [pk]
+  code              varchar [not null, unique]
+  name              varchar [not null]
+  description       text
+  image_url         varchar [note: 'Cloudinary storage URL']
+  is_active         boolean [not null, default: true]
+  tuition_per_term  decimal [note: 'VNĐ — ước tính học phí/kỳ, CM cập nhật; null nếu chưa cấu hình']
+  price_per_credit  decimal [note: 'VNĐ — giá học lại/tín chỉ, CM cập nhật; null nếu chưa cấu hình']
+  tuition_updated_at timestamp [note: 'timestamp lần CM cập nhật gần nhất — dùng để hiển thị disclaimer BR-47']
 }
 
 Table specialization {
-  id        uuid    [pk]
-  major_id  uuid    [not null, ref: > major.id]
-  code      varchar [not null, unique]
-  name      varchar [not null]
-  is_active boolean [not null, default: true]
+  id          uuid    [pk]
+  major_id    uuid    [not null, ref: > major.id]
+  code        varchar [not null, unique]
+  name        varchar [not null]
+  description text
+  image_url   varchar [note: 'Cloudinary storage URL']
+  alpha_base  decimal [not null, default: 0.70, note: 'init default for new narrow_spec_weight_config; CM override per NS']
+  is_active   boolean [not null, default: true]
 }
+
 
 Table narrow_spec {
   id                uuid      [pk]
-  specialization_id uuid      [not null, ref: > specialization.id]
+  specialization_id uuid      [not null, ref: > narrow_spec.id]
   code              varchar   [not null, unique]
   name              varchar   [not null]
   description       text
   is_published      boolean   [not null, default: false]
   published_at      timestamp
+}
+
+Table course {
+  id                uuid    [pk]
+  code              varchar [not null, unique]
+  name              varchar [not null]
+  credits           int     [not null]
+  description       text
+  counts_toward_gpa boolean [not null, default: true]
+  is_active         boolean [not null, default: true]
 }
 
 Table spec_course {
@@ -121,24 +140,12 @@ Table spec_course {
   }
 }
 
-Table course {
-  id                uuid    [pk]
-  code              varchar [not null, unique]
-  name              varchar [not null]
-  credits           int     [not null]
-  category          varchar [not null, note: 'GENERAL / CORE / SPECIALIZATION / OJT']
-  description       text
-  counts_toward_gpa boolean [not null, default: true, note: 'false = OJT/GDQP/Vovinam etc — BR-31']
-  is_active         boolean [not null, default: true]
-}
-
 Table ns_course {
   id             uuid    [pk]
   narrow_spec_id uuid    [not null, ref: > narrow_spec.id]
   course_id      uuid    [not null, ref: > course.id]
   term_order     int     [not null]
-  course_type    varchar [not null, note: 'SHARED / SPECIALIZED']
-
+  
   indexes {
     (narrow_spec_id, course_id) [unique]
   }
@@ -159,7 +166,7 @@ Table learning_resource {
   course_id     uuid      [not null, ref: > course.id]
   title         varchar   [not null]
   url           text      [not null]
-  resource_type varchar   [not null, note: 'VIDEO / ARTICLE / DOCS / EXERCISE']
+  resource_type varchar   [not null, note: 'LINK/ ARTICLE / DOCS / EXERCISE']
   display_order int       [not null, default: 0]
   created_at    timestamp [not null, default: `now()`]
 }
@@ -591,17 +598,5 @@ Table ai_api_usage_log {
   called_at    timestamp [not null, default: `now()`]
 }
 
-Table tuition_config {
-  id                      uuid      [pk]
-  major_id                uuid      [not null, ref: > major.id]
-  academic_year           varchar   [not null, note: 'e.g. 2024-2025']
-  term                    varchar   [not null, note: 'Fall / Spring / Summer']
-  tuition_per_term        decimal   [not null]
-  retake_price_per_credit decimal   [not null]
-  updated_at              timestamp [not null, default: `now()`]
 
-  indexes {
-    (major_id, academic_year, term) [unique]
-  }
-}
 
