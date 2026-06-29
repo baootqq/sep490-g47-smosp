@@ -74,8 +74,8 @@
   position: absolute;
   inset: 0;
   background-image:
-    radial-gradient(circle at 80% 20%, rgba(255,255,255,0.04) 0%, transparent 40%),
-    radial-gradient(circle at 20% 80%, rgba(255,255,255,0.03) 0%, transparent 30%);
+    radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.04) 0%, transparent 40%),
+    radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.03) 0%, transparent 30%);
   pointer-events: none;
 }
 
@@ -477,7 +477,7 @@
   right: 10px;
   font-size: 14px;
   line-height: 1;
-  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.15));
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15));
 }
 
 .spec-card__code {
@@ -543,6 +543,7 @@
     opacity: 0;
     transform: translateY(-6px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -843,6 +844,7 @@
 
 /* ── Reduced motion ── */
 @media (prefers-reduced-motion: reduce) {
+
   .spec-card,
   .ns-item,
   .ns-panel {

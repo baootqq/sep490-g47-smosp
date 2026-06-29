@@ -1,19 +1,24 @@
 /* ================================================================
-   StudentDashboard.css — v3 wide + scroll reveal
+   StudentDashboard.css — v4
    Font: Be Vietnam Pro | Brand: #034EA2 · #F37021 · #51B848
+   Changes vs v3:
+   - sd-page: bỏ max-width, full width content area
+   - sd-card: flex-direction column + nút margin-top auto → song song
+   - sd-holland-card / sd-rank-card: bỏ width: 70%, full width
    ================================================================ */
 
 @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap');
 
-/* ── Base ────────────────────────────────────────────────────── */
+/* ── Base ──────────────────────────────────────────────────────── */
 .sd-page {
     display: flex;
     flex-direction: column;
     gap: 40px;
     font-family: 'Be Vietnam Pro', sans-serif;
+    width: 100%;
 }
 
-/* ── Scroll reveal ───────────────────────────────────────────── */
+/* ── Scroll reveal ─────────────────────────────────────────────── */
 .sd-reveal {
     opacity: 0;
     transform: translateY(30px);
@@ -25,7 +30,7 @@
     transform: translateY(0);
 }
 
-/* ── Section labels ──────────────────────────────────────────── */
+/* ── Section labels ────────────────────────────────────────────── */
 .sd-sec-lbl {
     font-size: 11px;
     font-weight: 700;
@@ -125,7 +130,7 @@
 
 .sd-btn-ghost {
     background: rgba(255, 255, 255, 0.12);
-    color: rgba(255, 255, 255, 0.90);
+    color: rgba(255, 255, 255, 0.9);
     border: 1px solid rgba(255, 255, 255, 0.22);
     border-radius: 9px;
     padding: 10px 20px;
@@ -158,7 +163,7 @@
 }
 
 .sd-hbox {
-    background: rgba(255, 255, 255, 0.10);
+    background: rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.18);
     border-radius: 14px;
     padding: 24px 28px;
@@ -202,7 +207,7 @@
     font-family: 'Be Vietnam Pro', sans-serif;
 }
 
-/* Donut box */
+/* Donut */
 .sd-donut-wrap {
     position: relative;
     width: 88px;
@@ -257,6 +262,7 @@
     padding: 26px 28px;
     display: flex;
     flex-direction: column;
+    /* ← nút margin-top:auto hoạt động */
     transition: border-color 200ms ease;
 }
 
@@ -348,6 +354,7 @@
     color: #27500a;
 }
 
+/* ── Buttons (sd-card dùng flex-column → margin-top:auto đẩy nút xuống đáy) ── */
 .sd-btn-fill-blue {
     width: 100%;
     padding: 12px 0;
@@ -360,6 +367,7 @@
     background: #E6F1FB;
     color: #0C447C;
     margin-top: auto;
+    /* ← đẩy xuống đáy card */
     transition: background 140ms ease, transform 120ms ease;
 }
 
@@ -519,6 +527,11 @@
     animation: sd-pulse 2s ease-in-out infinite;
 }
 
+.sd-term-todo {
+    background: #f0f2f7;
+    color: #9ca3af;
+}
+
 @keyframes sd-pulse {
 
     0%,
@@ -529,11 +542,6 @@
     50% {
         opacity: 0.62;
     }
-}
-
-.sd-term-todo {
-    background: #f0f2f7;
-    color: #9ca3af;
 }
 
 .sd-term-legend {
@@ -570,7 +578,8 @@
     font-family: 'Be Vietnam Pro', sans-serif;
     background: #034EA2;
     color: #fff;
-    margin-top: 22px;
+    margin-top: auto;
+    /* ← đẩy xuống đáy card */
     transition: background 140ms ease, transform 120ms ease;
 }
 
@@ -584,10 +593,11 @@
 }
 
 /* ════════════════════════════════════════════════════════════════
-   HOLLAND — full-width card
+   HOLLAND — full width (bỏ width: 70%)
 ════════════════════════════════════════════════════════════════ */
 .sd-holland-card {
-    width: 70%;
+    width: 100%;
+    /* ← was 70% */
     background: #fff;
     border: 0.5px solid #e4e6ee;
     border-radius: 16px;
@@ -757,10 +767,11 @@
 }
 
 /* ════════════════════════════════════════════════════════════════
-   RANKING CHART
+   RANKING — full width (bỏ width: 70%)
 ════════════════════════════════════════════════════════════════ */
 .sd-rank-card {
-    width: 70%;
+    width: 100%;
+    /* ← was 70% */
     background: #fff;
     border: 0.5px solid #e4e6ee;
     border-radius: 16px;
@@ -857,7 +868,7 @@
     height: 280px;
 }
 
-/* ── Responsive ──────────────────────────────────────────────── */
+/* ── Responsive ────────────────────────────────────────────────── */
 @media (max-width: 1024px) {
     .sd-hero {
         grid-template-columns: 1fr;

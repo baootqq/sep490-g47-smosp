@@ -89,9 +89,22 @@ function DonutChart({ breakdown }) {
       type: 'doughnut',
       data: {
         labels: ['GPA', 'Kỹ năng', 'Sở thích', 'Chưa hoàn thiện'],
-        datasets: [{ data: breakdown, backgroundColor: ['#034EA2', '#F37021', '#51B848', 'rgba(255,255,255,0.12)'], borderWidth: 0, hoverOffset: 4 }],
+        datasets: [{
+          data: breakdown,
+          backgroundColor: ['#034EA2', '#F37021', '#51B848', 'rgba(255,255,255,0.12)'],
+          borderWidth: 0,
+          hoverOffset: 4,
+        }],
       },
-      options: { responsive: false, cutout: '68%', animation: { animateRotate: true, duration: 1200 }, plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => `${c.label}: ${c.raw}%` } } } },
+      options: {
+        responsive: false,
+        cutout: '68%',
+        animation: { animateRotate: true, duration: 1200 },
+        plugins: {
+          legend: { display: false },
+          tooltip: { callbacks: { label: (c) => `${c.label}: ${c.raw}%` } },
+        },
+      },
     })
     return () => c.destroy()
   }, [breakdown])
@@ -106,36 +119,97 @@ function HollandChart({ scores }) {
       type: 'radar',
       data: {
         labels: ['R', 'I', 'A', 'S', 'E', 'C'],
-        datasets: [{ data: [scores.R, scores.I, scores.A, scores.S, scores.E, scores.C], backgroundColor: 'rgba(3,78,162,0.13)', borderColor: '#034EA2', borderWidth: 2.5, pointBackgroundColor: '#034EA2', pointRadius: 5, pointHoverRadius: 7 }],
+        datasets: [{
+          data: [scores.R, scores.I, scores.A, scores.S, scores.E, scores.C],
+          backgroundColor: 'rgba(3,78,162,0.13)',
+          borderColor: '#034EA2',
+          borderWidth: 2.5,
+          pointBackgroundColor: '#034EA2',
+          pointRadius: 5,
+          pointHoverRadius: 7,
+        }],
       },
-      options: { responsive: false, animation: { duration: 1100 }, scales: { r: { min: 0, max: 100, ticks: { display: false }, grid: { color: 'rgba(0,0,0,0.07)' }, pointLabels: { font: { size: 12, family: 'Be Vietnam Pro', weight: '700' }, color: '#6b7280' } } }, plugins: { legend: { display: false } } },
+      options: {
+        responsive: false,
+        animation: { duration: 1100 },
+        scales: {
+          r: {
+            min: 0, max: 100,
+            ticks: { display: false },
+            grid: { color: 'rgba(0,0,0,0.07)' },
+            pointLabels: { font: { size: 12, family: 'Be Vietnam Pro', weight: '700' }, color: '#6b7280' },
+          },
+        },
+        plugins: { legend: { display: false } },
+      },
     })
     return () => c.destroy()
   }, [scores])
-  return <canvas ref={ref} width={140} height={140} role="img" aria-label={`Radar Holland: R:${scores.R} I:${scores.I} A:${scores.A} S:${scores.S} E:${scores.E} C:${scores.C}`} />
+  return (
+    <canvas
+      ref={ref}
+      width={140} height={140}
+      role="img"
+      aria-label={`Radar Holland: R:${scores.R} I:${scores.I} A:${scores.A} S:${scores.S} E:${scores.E} C:${scores.C}`}
+    />
+  )
 }
 
 function RankingChart({ data }) {
   const ref = useRef(null)
+  const finals = data.map((d) => d.profileScore + d.tw)
   useEffect(() => {
     if (!ref.current || !window.Chart) return
-    const finals = data.map((d) => d.profileScore + d.tw)
     const c = new window.Chart(ref.current, {
       type: 'bar',
       data: {
         labels: data.map((d) => d.name),
         datasets: [
-          { label: 'Profile Score', data: data.map((d) => d.profileScore), backgroundColor: ['#F37021', '#034EA2', '#85B7EB', '#85B7EB', '#85B7EB'], borderRadius: 0, borderSkipped: false, stack: 's' },
-          { label: 'Trending Weight', data: data.map((d) => d.tw), backgroundColor: ['rgba(243,112,33,0.30)', 'rgba(3,78,162,0.28)', 'rgba(133,183,235,0.35)', 'rgba(133,183,235,0.35)', 'rgba(133,183,235,0.35)'], borderRadius: 7, borderSkipped: false, stack: 's' },
+          {
+            label: 'Profile Score',
+            data: data.map((d) => d.profileScore),
+            backgroundColor: ['#F37021', '#034EA2', '#85B7EB', '#85B7EB', '#85B7EB'],
+            borderRadius: 0,
+            borderSkipped: false,
+            stack: 's',
+          },
+          {
+            label: 'Trending Weight',
+            data: data.map((d) => d.tw),
+            backgroundColor: [
+              'rgba(243,112,33,0.30)', 'rgba(3,78,162,0.28)',
+              'rgba(133,183,235,0.35)', 'rgba(133,183,235,0.35)', 'rgba(133,183,235,0.35)',
+            ],
+            borderSkipped: false,
+            stack: 's',
+          },
         ],
       },
       options: {
-        responsive: true, maintainAspectRatio: false,
+        responsive: true,
+        maintainAspectRatio: false,
         animation: { duration: 1200, easing: 'easeOutQuart' },
-        plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${Math.round(c.raw)}`, afterBody: (items) => [`Final Score: ${finals[items[0].dataIndex]}`] } } },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: (c) => `${c.dataset.label}: ${Math.round(c.raw)}`,
+              afterBody: (items) => [`Final Score: ${finals[items[0].dataIndex]}`],
+            },
+          },
+        },
         scales: {
-          x: { ticks: { font: { size: 12, family: 'Be Vietnam Pro', weight: '600' }, maxRotation: 0 }, grid: { display: false }, stacked: true },
-          y: { min: 0, max: 100, ticks: { font: { size: 11, family: 'Be Vietnam Pro' }, stepSize: 25 }, grid: { color: 'rgba(0,0,0,0.04)' }, stacked: true },
+          x: {
+            ticks: { font: { size: 12, family: 'Be Vietnam Pro', weight: '600' }, maxRotation: 0 },
+            grid: { display: false },
+            stacked: true,
+          },
+          y: {
+            min: 0, max: 100,
+            ticks: { font: { size: 11, family: 'Be Vietnam Pro' }, stepSize: 25 },
+            grid: { color: 'rgba(0,0,0,0.04)' },
+            stacked: true,
+          },
         },
       },
     })
@@ -143,7 +217,11 @@ function RankingChart({ data }) {
   }, [data])
   return (
     <div className="sd-chart-wrap">
-      <canvas ref={ref} role="img" aria-label={`Ranking: ${data.map((d) => `${d.name} ${d.profileScore + d.tw}`).join(', ')}`}>
+      <canvas
+        ref={ref}
+        role="img"
+        aria-label={`Ranking: ${data.map((d) => `${d.name} ${d.profileScore + d.tw}`).join(', ')}`}
+      >
         {data.map((d) => `${d.name}: ${d.profileScore + d.tw}`).join(', ')}
       </canvas>
     </div>
@@ -156,7 +234,7 @@ export default function StudentDashboard() {
   const username = localStorage.getItem('username') || 'Sinh viên'
   const p = MOCK /* TODO: useState + useEffect → API */
 
-  /* Refs cho từng section */
+  /* Refs */
   const heroRef = useRef(null)
   const profileRef = useRef(null)
   const hollandRef = useRef(null)
@@ -174,17 +252,14 @@ export default function StudentDashboard() {
   const [pctVal, animPct] = useAnimCount(p.profileScore, 0, 900)
 
   useEffect(() => {
-    if (heroVisible) {
-      animGpa(); animSk(); animInt(); animPct()
-    }
+    if (heroVisible) { animGpa(); animSk(); animInt(); animPct() }
   }, [heroVisible])
 
   /* Progress bar — chạy khi profileRef visible */
   const [progWidth, setProgWidth] = useState('0%')
   useEffect(() => {
-    if (profileVisible) {
+    if (profileVisible)
       setTimeout(() => setProgWidth(`${Math.round((p.roadmap.credits / p.roadmap.total) * 100)}%`), 200)
-    }
   }, [profileVisible])
 
   /* Holland dim bars — chạy khi hollandRef visible */
@@ -197,10 +272,7 @@ export default function StudentDashboard() {
     i + 1 < p.term ? 'done' : i + 1 === p.term ? 'cur' : 'todo'
   )
 
-  const handleLogout = async () => {
-    await logout()
-    navigate('/login')
-  }
+  const handleLogout = async () => { await logout(); navigate('/login') }
 
   return (
     <Layout
@@ -214,23 +286,18 @@ export default function StudentDashboard() {
       <div className="sd-page">
 
         {/* ── HERO ──────────────────────────────────────── */}
-        <div
-          ref={heroRef}
-          className={`sd-reveal sd-hero${heroVisible ? ' sd-visible' : ''}`}
-        >
+        <div ref={heroRef} className={`sd-reveal sd-hero${heroVisible ? ' sd-visible' : ''}`}>
           <div className="sd-hero-left">
             <div>
               <h1>Xin chào, {username}!</h1>
               <p className="sd-hero-meta">
                 Chuyên ngành: <strong>{p.major}</strong>
                 &nbsp;·&nbsp;
-                Chuyên ngành hẹp:{' '}
-                <span className="sd-spec-hl">{p.narrowSpec}</span>
+                Chuyên ngành hẹp: <span className="sd-spec-hl">{p.narrowSpec}</span>
                 <br />
                 Cập nhật lần cuối: {p.updatedAt}&nbsp;·&nbsp;Kỳ {p.term} / 9
               </p>
             </div>
-
           </div>
 
           <div className="sd-hero-right">
@@ -239,7 +306,6 @@ export default function StudentDashboard() {
               <div className="sd-hlbl">GPA hiện tại</div>
               <div className="sd-hsub">/ 4.0</div>
             </div>
-
             <div className="sd-hbox">
               <div className="sd-hlbl" style={{ marginBottom: 6 }}>Hồ sơ</div>
               <div className="sd-donut-wrap">
@@ -258,7 +324,7 @@ export default function StudentDashboard() {
           </div>
         </div>
 
-        {/* ── PROFILE SECTION ───────────────────────────── */}
+        {/* ── PROFILE ───────────────────────────────────── */}
         <div
           ref={profileRef}
           className={`sd-reveal${profileVisible ? ' sd-visible' : ''}`}
@@ -288,6 +354,7 @@ export default function StudentDashboard() {
                   </span>
                 ))}
               </div>
+              {/* margin-top:auto trong CSS đẩy nút xuống đáy */}
               <button className="sd-btn-fill-blue" onClick={() => navigate('/student/profile')}>
                 Cập nhật hồ sơ
               </button>
@@ -330,14 +397,16 @@ export default function StudentDashboard() {
                 <div className="sd-tleg"><div className="sd-tdot" style={{ background: '#F37021' }} />Đang học</div>
                 <div className="sd-tleg"><div className="sd-tdot" style={{ background: '#f0f2f7', border: '0.5px solid #d1d5db' }} />Chưa học</div>
               </div>
+              {/* margin-top:auto trong CSS đẩy nút xuống đáy */}
               <button className="sd-btn-fill-navy" onClick={() => navigate('/student/roadmap')}>
                 Xem lộ trình cá nhân
               </button>
             </div>
+
           </div>
         </div>
 
-        {/* ── HOLLAND SECTION ───────────────────────────── */}
+        {/* ── HOLLAND ───────────────────────────────────── */}
         <div
           ref={hollandRef}
           className={`sd-reveal${hollandVisible ? ' sd-visible' : ''}`}
@@ -355,10 +424,11 @@ export default function StudentDashboard() {
                   </div>
                 ))}
               </div>
-              <button className="sd-btn-outline" onClick={() => navigate('/student/holland')}>
+              <button className="sd-btn-outline" onClick={() => navigate('/student/holland/test')}>
                 Làm lại đánh giá
               </button>
             </div>
+
             <div>
               <div className="sd-h-type-badge">Kiểu nhân cách: I – R</div>
               <div className="sd-h-desc">
@@ -366,10 +436,8 @@ export default function StudentDashboard() {
                 giải quyết vấn đề phức tạp và làm việc với hệ thống kỹ thuật. Kiểu này phù hợp cao với{' '}
                 <strong>AI/ML Engineering</strong> và <strong>Research Engineering</strong> tại FPT University.
               </div>
-
-              {/* Mini bar chart 6 dims */}
               <div className="sd-h-dims">
-                {p.holland.dims.map((d) => {
+                {p.holland.dims.map((d, idx) => {
                   const barColor = d.val >= 80 ? '#034EA2' : d.val >= 60 ? '#85B7EB' : '#e4e6ee'
                   return (
                     <div key={d.label} className="sd-hdim">
@@ -379,7 +447,7 @@ export default function StudentDashboard() {
                           style={{
                             height: hollandBarsReady ? `${(d.val / 100) * 72}px` : '0px',
                             background: barColor,
-                            transitionDelay: `${p.holland.dims.indexOf(d) * 60}ms`,
+                            transitionDelay: `${idx * 60}ms`,
                           }}
                         />
                       </div>
@@ -389,13 +457,11 @@ export default function StudentDashboard() {
                   )
                 })}
               </div>
-
-
             </div>
           </div>
         </div>
 
-        {/* ── RANKING SECTION ───────────────────────────── */}
+        {/* ── RANKING ───────────────────────────────────── */}
         <div
           ref={rankingRef}
           className={`sd-reveal${rankingVisible ? ' sd-visible' : ''}`}

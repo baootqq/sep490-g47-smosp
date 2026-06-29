@@ -98,11 +98,6 @@
 			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
 			<version>2.8.9</version>
 		</dependency>
-		<!-- Spring Mail -->
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-mail</artifactId>
-		</dependency>
 
 		<!-- Firebase Admin SDK -->
 		<dependency>
@@ -111,11 +106,11 @@
 			<version>9.2.0</version>
 		</dependency>
 
-		<!-- Google API Client for GoogleIdTokenVerifier -->
+		<!-- Cloudinary -->
 		<dependency>
-			<groupId>com.google.api-client</groupId>
-			<artifactId>google-api-client</artifactId>
-			<version>2.4.0</version>
+			<groupId>com.cloudinary</groupId>
+			<artifactId>cloudinary-http44</artifactId>
+			<version>1.38.0</version>
 		</dependency>
 	</dependencies>
 

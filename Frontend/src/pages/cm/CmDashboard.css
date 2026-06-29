@@ -1,0 +1,518 @@
+/* ============================================================
+   CmDashboard.css
+   Pattern: mirror StudentDashboard — sd- prefix → cm-
+   Colors: #F37021 primary, #034EA2 blue, #51B848 green
+   Font: Be Vietnam Pro
+   ============================================================ */
+
+/* ── Page ── */
+.cm-page {
+    padding: 28px 32px 48px;
+    width: 100%;
+    font-family: 'Be Vietnam Pro', system-ui, sans-serif;
+    color: #1a1a1a;
+}
+
+/* ── Reveal animation (mirror sd-reveal / sd-visible) ── */
+.cm-reveal {
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 0.45s ease, transform 0.45s ease;
+}
+
+.cm-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* ── Section title ── */
+.cm-sec-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #888882;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin: 28px 0 12px;
+}
+
+/* ── Grid layouts ── */
+.cm-row-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.cm-row-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+}
+
+@media (max-width: 820px) {
+
+    .cm-row-2,
+    .cm-row-3 {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ── Card (mirror sd-card) ── */
+.cm-card {
+    background: #ffffff;
+    border: 0.5px solid rgba(0, 0, 0, 0.1);
+    border-radius: 14px;
+    padding: 20px 20px 16px;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Đẩy nút xuống đáy card — các card cùng hàng có nút ngang nhau */
+.cm-card>.cm-btn-fill-blue,
+.cm-card>.cm-btn-fill-navy,
+.cm-card>.cm-btn-outline {
+    margin-top: auto;
+    padding-top: 10px;
+}
+
+.cm-ctitle {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin-bottom: 14px;
+}
+
+.cm-card-sub {
+    font-size: 12px;
+    color: #888882;
+    margin: -8px 0 12px;
+}
+
+.cm-card-updated {
+    font-size: 11px;
+    color: #aaa;
+    margin: 8px 0 10px;
+}
+
+.cm-divider {
+    height: 0.5px;
+    background: rgba(0, 0, 0, 0.08);
+    margin: 14px 0;
+}
+
+/* ── Stat grid (2x2 inside card) ── */
+.cm-stat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.cm-stat-box {
+    background: #f7f7f5;
+    border-radius: 10px;
+    padding: 10px 12px;
+}
+
+.cm-stat-box__num {
+    font-size: 22px;
+    font-weight: 700;
+    color: #1a1a1a;
+    line-height: 1.15;
+}
+
+.cm-stat-box__num--blue {
+    color: #034EA2;
+}
+
+.cm-stat-box__num--green {
+    color: #2d7a26;
+}
+
+.cm-stat-box__num--muted {
+    color: #888882;
+}
+
+.cm-stat-box__num--danger {
+    color: #d93025;
+}
+
+.cm-stat-box__lbl {
+    font-size: 11px;
+    color: #888882;
+    margin-top: 2px;
+}
+
+/* ── Alert list / rows (thay alert-strip bằng inline row) ── */
+.cm-alert-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 14px;
+}
+
+.cm-alert-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: none;
+    text-align: left;
+    font-family: 'Be Vietnam Pro', system-ui, sans-serif;
+    font-size: 12px;
+    cursor: default;
+    width: 100%;
+}
+
+button.cm-alert-row {
+    cursor: pointer;
+    transition: filter 0.12s;
+}
+
+button.cm-alert-row:hover {
+    filter: brightness(0.95);
+}
+
+.cm-alert-row__dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.cm-alert-row__text {
+    flex: 1;
+    color: inherit;
+    line-height: 1.4;
+}
+
+.cm-alert-row__action {
+    font-weight: 600;
+    white-space: nowrap;
+    margin-left: 4px;
+    flex-shrink: 0;
+}
+
+/* Variants */
+.cm-alert-row--danger {
+    background: #fdecea;
+    color: #a32d2d;
+}
+
+.cm-alert-row--danger .cm-alert-row__dot {
+    background: #d93025;
+}
+
+.cm-alert-row--warning {
+    background: #fff6ed;
+    color: #9a5100;
+}
+
+.cm-alert-row--warning .cm-alert-row__dot {
+    background: #F37021;
+}
+
+.cm-alert-row--info {
+    background: #edf4ff;
+    color: #1a56b0;
+}
+
+.cm-alert-row--info .cm-alert-row__dot {
+    background: #034EA2;
+}
+
+.cm-alert-row--ok {
+    background: #edf7ec;
+    color: #2d7a26;
+}
+
+.cm-alert-row--ok .cm-alert-row__dot {
+    background: #51B848;
+}
+
+/* ── Crawl status ── */
+.cm-crawl-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 3px;
+}
+
+.cm-crawl-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.cm-crawl-dot--success {
+    background: #51B848;
+}
+
+.cm-crawl-dot--danger {
+    background: #d93025;
+}
+
+.cm-crawl-dot--warning {
+    background: #F37021;
+}
+
+.cm-crawl-dot--neutral {
+    background: #aaa;
+}
+
+.cm-crawl-status__text {
+    font-size: 13px;
+    color: #1a1a1a;
+}
+
+.cm-crawl-status__text strong {
+    font-weight: 600;
+}
+
+.cm-crawl-meta {
+    font-size: 12px;
+    color: #888882;
+    margin: 0 0 12px;
+}
+
+/* ── Trigger bar ── */
+.cm-trigger-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #f7f7f5;
+    border: 0.5px solid rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    padding: 14px 20px;
+    gap: 16px;
+    margin-top: 4px;
+}
+
+.cm-trigger-bar__left {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.cm-trigger-bar__label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #1a1a1a;
+}
+
+.cm-trigger-bar__sub {
+    font-size: 12px;
+    color: #888882;
+}
+
+/* ── Buttons (mirror sd-btn-*) ── */
+.cm-btn-fill-blue {
+    margin-top: 16px;
+    width: 100%;
+    padding: 10px 0;
+    background: #034EA2;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-family: 'Be Vietnam Pro', system-ui, sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.cm-btn-fill-blue:hover {
+    background: #0562c7;
+}
+
+.cm-btn-fill-navy {
+    margin-top: 16px;
+    width: 100%;
+    padding: 10px 0;
+    background: #1a1a1a;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-family: 'Be Vietnam Pro', system-ui, sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.cm-btn-fill-navy:hover {
+    background: #333;
+}
+
+.cm-btn-outline {
+    margin-top: 16px;
+    width: 100%;
+    padding: 9px 0;
+    background: transparent;
+    color: #034EA2;
+    border: 1.5px solid #034EA2;
+    border-radius: 10px;
+    font-family: 'Be Vietnam Pro', system-ui, sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+
+.cm-btn-outline:hover {
+    background: #edf4ff;
+}
+
+/* ── Compatibility Score chart wrap ── */
+.cm-weight-chart-wrap {
+    margin-bottom: 12px;
+}
+
+.cm-weight-legend {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.cm-wleg-row {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 12px;
+    color: #555550;
+}
+
+.cm-wleg-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+    flex-shrink: 0;
+}
+
+.cm-wleg-label {
+    flex: 1;
+}
+
+.cm-wleg-pct {
+    font-weight: 600;
+    color: #1a1a1a;
+}
+
+/* ── Holland RIASEC body ── */
+.cm-holland-body {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 4px;
+}
+
+.cm-holland-chart {
+    flex-shrink: 0;
+}
+
+.cm-holland-dims {
+    display: flex;
+    align-items: flex-end;
+    gap: 6px;
+    flex: 1;
+    height: 88px;
+    padding-bottom: 18px;
+}
+
+.cm-hdim {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    flex: 1;
+}
+
+.cm-hdim-bar-wrap {
+    flex: 1;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.cm-hdim-bar {
+    width: 14px;
+    background: #034EA2;
+    border-radius: 3px 3px 0 0;
+    transition: height 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+    min-height: 2px;
+}
+
+.cm-hdim-lbl {
+    font-size: 10px;
+    font-weight: 700;
+    color: #6b7280;
+}
+
+.cm-hdim-val {
+    font-size: 10px;
+    color: #888882;
+}
+
+/* ── Question Bank rows ── */
+.cm-qb-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 4px;
+}
+
+.cm-qb-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.cm-qb-dim {
+    font-size: 11px;
+    font-weight: 700;
+    color: #555550;
+    width: 14px;
+    flex-shrink: 0;
+}
+
+.cm-qb-name {
+    font-size: 11px;
+    color: #888882;
+    width: 72px;
+    flex-shrink: 0;
+}
+
+.cm-qb-track {
+    flex: 1;
+    height: 6px;
+    background: #f0f0ee;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.cm-qb-fill {
+    height: 100%;
+    background: #034EA2;
+    border-radius: 3px;
+    transition: width 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.cm-qb-fill--low {
+    background: #d93025;
+}
+
+.cm-qb-count {
+    font-size: 11px;
+    font-weight: 600;
+    color: #1a1a1a;
+    width: 20px;
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.cm-qb-count--low {
+    color: #d93025;
+}
