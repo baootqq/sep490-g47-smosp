@@ -119,7 +119,7 @@ function RegisterPage() {
 
             <div className="lp-feature-item">
               <span className="lp-feature-num">4</span>
-              Bài test Holland và hỗ trợ chuyển ngành
+              Bài test Holland và phân tích chuyển ngành
             </div>
           </div>
 
@@ -134,12 +134,7 @@ function RegisterPage() {
 
           <div className="lp-form-box">
             <div className="eyebrow" style={{ marginBottom: 12 }}>Tạo tài khoản mới</div>
-            <h1 className="lp-title">
-              Đăng ký tài khoản{" "}
-              <span style={{ color: "var(--accent)" }}>
-                SMOSP
-              </span>
-            </h1>
+
 
             {/* Google */}
             <button className="lp-google-btn" type="button"
