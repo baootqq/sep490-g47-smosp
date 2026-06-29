@@ -34,6 +34,8 @@ function AppRoutes() {
       <Route path="/settings/password" element={<ChangePasswordPage />} />
       <Route path="/settings" element={<Navigate to="/settings/account" replace />} />
       <Route path="/major-catalog" element={<MajorCatalog />} />
+      <Route path="/catalog" element={<MajorCatalog />} />
+
 
       {/* Role-based Protected Dashboards */}
       <Route

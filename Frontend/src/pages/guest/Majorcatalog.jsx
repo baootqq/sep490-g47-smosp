@@ -132,7 +132,7 @@ export default function Majorcatalog({
         }),
       }))
       .filter(m => m.specializations.length > 0);
-  }, [filterMajor, filterSpec, searchQuery]);
+  }, [catalogData, filterMajor, filterSpec, searchQuery]);
 
   const hasActiveFilter = filterMajor || filterSpec || searchQuery;
 
