@@ -12,6 +12,8 @@ import CmDashboard from "../pages/cm/CmDashboard";
 import HollandQuestionPage from "../pages/cm/HollandQuestionPage";
 import HollandScoringWeightPage from "../pages/cm/HollandScoringWeightPage";
 import CmCatalogPage from "../pages/cm/CmCatalogPage";
+import CmCoursePage from "../pages/cm/CmCoursePage";
+import CmCurriculumPage from "../pages/cm/CmCurriculumPage";
 import StudentDashboard from "../pages/student/StudentDashboard";
 import HollandResultPage from "../pages/student/HollandResultPage";
 import HollandTestPage from "../pages/student/HollandTestPage";
@@ -69,6 +71,22 @@ function AppRoutes() {
         element={
           <ProtectedRoute allowedRoles={["ROLE_CONTENT_MANAGER"]}>
             <CmCatalogPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/cm/courses"
+        element={
+          <ProtectedRoute allowedRoles={["ROLE_CONTENT_MANAGER"]}>
+            <CmCoursePage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/cm/curriculum"
+        element={
+          <ProtectedRoute allowedRoles={["ROLE_CONTENT_MANAGER"]}>
+            <CmCurriculumPage />
           </ProtectedRoute>
         }
       />

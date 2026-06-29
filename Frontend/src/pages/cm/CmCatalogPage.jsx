@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { logout } from '../../services/authService'
 import Layout from '../../components/layout/Layout'
@@ -10,8 +10,10 @@ import {
     getNarrowSpecsBySpecialization,
     getNarrowSpecDetail,
     createMajor,
+    updateMajor,
     updateMajorStatus,
     createSpecialization,
+    updateSpecialization,
     updateSpecializationStatus,
     createNarrowSpec,
     updateNarrowSpec,
@@ -30,7 +32,7 @@ function getChecklist(ns, specIsActive) {
 }
 
 /* ── Right panel modes ── */
-const PANEL = { EMPTY: 'EMPTY', VIEW_MAJOR: 'VIEW_MAJOR', EDIT_MAJOR: 'EDIT_MAJOR', VIEW_SPEC: 'VIEW_SPEC', EDIT_SPEC: 'EDIT_SPEC', VIEW_NS: 'VIEW_NS', EDIT_NS: 'EDIT_NS', ADD_NS: 'ADD_NS', ADD_SPEC: 'ADD_SPEC', ADD_MAJOR: 'ADD_MAJOR' }
+const PANEL = { EMPTY: 'EMPTY', EDIT_MAJOR: 'EDIT_MAJOR', EDIT_SPEC: 'EDIT_SPEC', EDIT_NS: 'EDIT_NS', ADD_NS: 'ADD_NS', ADD_SPEC: 'ADD_SPEC', ADD_MAJOR: 'ADD_MAJOR' }
 
 export default function CmCatalogPage() {
     const navigate = useNavigate()
@@ -113,6 +115,7 @@ export default function CmCatalogPage() {
             }
             
             setTreeData(assembledTree);
+            return assembledTree;
         } catch (error) {
             console.error("Failed to load catalog tree:", error);
         } finally {
@@ -149,14 +152,28 @@ export default function CmCatalogPage() {
         setSelectedMajor(major)
         setSelectedSpecDetail(null)
         setSelectedNS(null)
-        setPanel(PANEL.VIEW_MAJOR)
+        setForm({
+            name: major.name,
+            code: major.code,
+            parentId: '',
+            description: major.description || '',
+        })
+        setPanel(PANEL.EDIT_MAJOR)
+        setExpandedMajors(p => ({ ...p, [major.id]: true }))
     }
 
     function selectSpec(spec, major) {
         setSelectedSpecDetail({ spec, major })
         setSelectedMajor(null)
         setSelectedNS(null)
-        setPanel(PANEL.VIEW_SPEC)
+        setForm({
+            name: spec.name,
+            code: spec.code,
+            parentId: major.id,
+            description: spec.description || '',
+        })
+        setPanel(PANEL.EDIT_SPEC)
+        setExpandedSpecs(p => ({ ...p, [spec.id]: true }))
     }
 
     async function selectNS(ns, spec, major) {
@@ -171,14 +188,26 @@ export default function CmCatalogPage() {
             setSelectedSpecDetail(null);
             setSelectedMajor(null);
             setNsStatus(detail.isPublished ? 'published' : 'draft');
-            setPanel(PANEL.VIEW_NS);
+            setForm({
+                name: enrichedNS.name,
+                code: enrichedNS.code,
+                parentId: spec.id,
+                description: enrichedNS.description || '',
+            })
+            setPanel(PANEL.EDIT_NS);
         } catch (err) {
             console.error("Error loading narrow spec detail:", err);
             setSelectedNS({ ns, spec, major });
             setSelectedSpecDetail(null);
             setSelectedMajor(null);
             setNsStatus(ns.isPublished ? 'published' : 'draft');
-            setPanel(PANEL.VIEW_NS);
+            setForm({
+                name: ns.name,
+                code: ns.code,
+                parentId: spec.id,
+                description: ns.description || '',
+            })
+            setPanel(PANEL.EDIT_NS);
         }
     }
 
@@ -198,46 +227,6 @@ export default function CmCatalogPage() {
         setSelectedNS(null); setSelectedSpecDetail(null); setSelectedMajor(null);
         setForm({ name: '', code: '', parentId: parentSpecId, description: '' })
         setPanel(PANEL.ADD_NS)
-    }
-
-    function openEditNS() {
-        if (!selectedNS) return
-        setForm({
-            name: selectedNS.ns.name,
-            code: selectedNS.ns.code,
-            parentId: selectedNS.spec.id,
-            description: selectedNS.ns.description || '',
-        })
-        setPanel(PANEL.EDIT_NS)
-    }
-
-    function openEditSpec() {
-        if (!selectedSpecDetail) return
-        setForm({
-            name: selectedSpecDetail.spec.name,
-            code: selectedSpecDetail.spec.code,
-            parentId: selectedSpecDetail.major.id,
-            description: selectedSpecDetail.spec.description || '',
-        })
-        setPanel(PANEL.EDIT_SPEC)
-    }
-
-    function openEditMajor() {
-        if (!selectedMajor) return
-        setForm({
-            name: selectedMajor.name,
-            code: selectedMajor.code,
-            parentId: '',
-            description: selectedMajor.description || '',
-        })
-        setPanel(PANEL.EDIT_MAJOR)
-    }
-
-    function cancelForm() {
-        if (selectedNS) setPanel(PANEL.VIEW_NS)
-        else if (selectedSpecDetail) setPanel(PANEL.VIEW_SPEC)
-        else if (selectedMajor) setPanel(PANEL.VIEW_MAJOR)
-        else setPanel(PANEL.EMPTY)
     }
 
     const handleLogout = async () => { await logout(); navigate('/login') }
@@ -265,50 +254,21 @@ export default function CmCatalogPage() {
             </div>
         )
 
-        /* VIEW MAJOR */
-        if (panel === PANEL.VIEW_MAJOR && selectedMajor) {
-            return (
-                <>
-                    <div className="cc-rp-header">
-                        <div className="cc-rp-meta">
-                            <div className="cc-rp-eyebrow">Ngành học (Major)</div>
-                            <div className="cc-rp-title">{selectedMajor.name}</div>
-                            <div className="cc-rp-subtitle">Mã: {selectedMajor.code}</div>
-                        </div>
-                        <div className="cc-rp-btns">
-                            <button className="cc-btn cc-btn-ghost" onClick={openEditMajor} type="button">Sửa thông tin</button>
-                            <button 
-                                className="cc-btn cc-btn-danger-sm" 
-                                onClick={() => alert("Chức năng xóa cứng bị giới hạn để tránh mất dữ liệu liên quan. Vui lòng bấm vào icon chấm tròn ngoài danh sách cây để Ẩn ngành này khỏi hệ thống.")} 
-                                type="button"
-                            >Xóa</button>
-                        </div>
-                    </div>
-                    <div className="cc-rp-body">
-                        <div className="cc-info-grid" style={{ gridTemplateColumns: '1fr' }}>
-                            <div className="cc-info-box">
-                                <div className="cc-info-lbl">Trạng thái hiện tại</div>
-                                <div className={`cc-info-val${selectedMajor.isActive ? ' green' : ' muted'}`}>{selectedMajor.isActive ? 'Đang kích hoạt' : 'Đang ẩn'}</div>
-                            </div>
-                        </div>
-                        <div className="cc-sec-title">Mô tả ngành học</div>
-                        <p className="cc-desc-text">{selectedMajor.description || 'Chưa có mô tả'}</p>
-                    </div>
-                </>
-            )
-        }
-
         /* EDIT MAJOR */
         if (panel === PANEL.EDIT_MAJOR && selectedMajor) {
             return (
                 <>
                     <div className="cc-rp-header">
                         <div className="cc-rp-meta">
-                            <div className="cc-rp-eyebrow">Chỉnh sửa · Ngành (Major)</div>
+                            <div className="cc-rp-eyebrow">Ngành học (Major)</div>
                             <div className="cc-rp-title">{selectedMajor.name}</div>
                         </div>
                         <div className="cc-rp-btns">
-                            <button className="cc-btn cc-btn-ghost" onClick={cancelForm} type="button">Hủy</button>
+                            <button 
+                                className="cc-btn cc-btn-danger-sm" 
+                                onClick={() => alert("Chức năng xóa cứng bị giới hạn để tránh mất dữ liệu liên quan. Vui lòng bấm vào icon chấm tròn ngoài danh sách cây để Ẩn ngành này khỏi hệ thống.")}  
+                                type="button"
+                            >Xóa</button>
                             <button 
                                 className="cc-btn cc-btn-save" 
                                 onClick={async () => {
@@ -317,7 +277,6 @@ export default function CmCatalogPage() {
                                         return;
                                     }
                                     try {
-                                        const { updateMajor } = await import('../../services/catalogService');
                                         const updated = await updateMajor(selectedMajor.id, {
                                             code: form.code,
                                             name: form.name,
@@ -335,53 +294,37 @@ export default function CmCatalogPage() {
                         </div>
                     </div>
                     <div className="cc-rp-body">
-                        <FormRow label="Tên ngành" required maxLen={100}>
-                            <input className="cc-input" type="text" defaultValue={selectedMajor.name} maxLength={100} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} />
-                        </FormRow>
-                        <FormRow label="Mã ngành" required>
-                            <input className="cc-input" type="text" defaultValue={selectedMajor.code} onChange={e => setForm(p => ({ ...p, code: e.target.value }))} />
-                        </FormRow>
-                        <FormRow label="Mô tả" maxLen={500}>
-                            <textarea className="cc-input cc-textarea" maxLength={500} defaultValue={selectedMajor.description || ''} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} />
-                        </FormRow>
-                    </div>
-                </>
-            )
-        }
-
-        /* VIEW SPEC */
-        if (panel === PANEL.VIEW_SPEC && selectedSpecDetail) {
-            const { spec, major } = selectedSpecDetail;
-            return (
-                <>
-                    <div className="cc-rp-header">
-                        <div className="cc-rp-meta">
-                            <div className="cc-rp-eyebrow">Chuyên ngành (Specialization) · {major.name}</div>
-                            <div className="cc-rp-title">{spec.name}</div>
-                            <div className="cc-rp-subtitle">Mã: {spec.code}</div>
-                        </div>
-                        <div className="cc-rp-btns">
-                            <button className="cc-btn cc-btn-ghost" onClick={openEditSpec} type="button">Sửa thông tin</button>
-                            <button 
-                                className="cc-btn cc-btn-danger-sm" 
-                                onClick={() => alert("Chức năng xóa cứng bị giới hạn để tránh mất dữ liệu liên quan. Vui lòng bấm vào icon chấm tròn ngoài danh sách cây để Ẩn chuyên ngành này.")} 
-                                type="button"
-                            >Xóa</button>
-                        </div>
-                    </div>
-                    <div className="cc-rp-body">
-                        <div className="cc-info-grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
+                        <div className="cc-info-grid" style={{ gridTemplateColumns: '1fr', marginBottom: 16 }}>
                             <div className="cc-info-box">
                                 <div className="cc-info-lbl">Trạng thái hiện tại</div>
-                                <div className={`cc-info-val${spec.isActive ? ' green' : ' muted'}`}>{spec.isActive ? 'Đang kích hoạt' : 'Đang ẩn'}</div>
-                            </div>
-                            <div className="cc-info-box">
-                                <div className="cc-info-lbl">Số lượng CN hẹp</div>
-                                <div className="cc-info-val blue">{spec.narrowSpecs ? spec.narrowSpecs.length : 0} CN</div>
+                                <select
+                                    className={`cc-status-select cc-status-select--${selectedMajor.isActive ? 'published' : 'hidden'}`}
+                                    value={selectedMajor.isActive ? 'published' : 'hidden'}
+                                    onChange={async (e) => {
+                                        const isActive = e.target.value === 'published';
+                                        try {
+                                            const updated = await updateMajorStatus(selectedMajor.id, isActive);
+                                            await loadTreeData();
+                                            selectMajor({ ...updated, specializations: selectedMajor.specializations });
+                                        } catch (err) {
+                                            alert("Lỗi khi đổi trạng thái: " + (err.response?.data?.message || err.message));
+                                        }
+                                    }}
+                                >
+                                    <option value="published">● Đang kích hoạt</option>
+                                    <option value="hidden">● Đang ẩn</option>
+                                </select>
                             </div>
                         </div>
-                        <div className="cc-sec-title">Mô tả chuyên ngành</div>
-                        <p className="cc-desc-text">{spec.description || 'Chưa có mô tả'}</p>
+                        <FormRow label="Tên ngành" required maxLen={100}>
+                            <input className="cc-input" type="text" value={form.name} maxLength={100} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} />
+                        </FormRow>
+                        <FormRow label="Mã ngành" required>
+                            <input className="cc-input" type="text" value={form.code} onChange={e => setForm(p => ({ ...p, code: e.target.value }))} />
+                        </FormRow>
+                        <FormRow label="Mô tả" maxLen={500}>
+                            <textarea className="cc-input cc-textarea" maxLength={500} value={form.description || ''} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} />
+                        </FormRow>
                     </div>
                 </>
             )
@@ -394,11 +337,15 @@ export default function CmCatalogPage() {
                 <>
                     <div className="cc-rp-header">
                         <div className="cc-rp-meta">
-                            <div className="cc-rp-eyebrow">Chỉnh sửa · Chuyên ngành (Specialization)</div>
+                            <div className="cc-rp-eyebrow">Chuyên ngành (Specialization) · {major.name}</div>
                             <div className="cc-rp-title">{spec.name}</div>
                         </div>
                         <div className="cc-rp-btns">
-                            <button className="cc-btn cc-btn-ghost" onClick={cancelForm} type="button">Hủy</button>
+                            <button 
+                                className="cc-btn cc-btn-danger-sm" 
+                                onClick={() => alert("Chức năng xóa cứng bị giới hạn để tránh mất dữ liệu liên quan. Vui lòng bấm vào icon chấm tròn ngoài danh sách cây để Ẩn chuyên ngành này.")}  
+                                type="button"
+                            >Xóa</button>
                             <button 
                                 className="cc-btn cc-btn-save" 
                                 onClick={async () => {
@@ -407,7 +354,6 @@ export default function CmCatalogPage() {
                                         return;
                                     }
                                     try {
-                                        const { updateSpecialization } = await import('../../services/catalogService');
                                         const updated = await updateSpecialization(spec.id, {
                                             majorId: form.parentId,
                                             code: form.code,
@@ -415,8 +361,12 @@ export default function CmCatalogPage() {
                                             description: form.description || ""
                                         });
                                         alert("Đã lưu chuyên ngành thành công!");
-                                        await loadTreeData();
-                                        selectSpec({ ...updated, narrowSpecs: spec.narrowSpecs }, tree.find(m => m.id === form.parentId));
+                                        const updatedTree = await loadTreeData();
+                                        let newMajor = major;
+                                        if (updatedTree) {
+                                            newMajor = updatedTree.find(m => m.id === form.parentId) || major;
+                                        }
+                                        selectSpec({ ...updated, narrowSpecs: spec.narrowSpecs }, newMajor);
                                     } catch (err) {
                                         alert("Lỗi: " + (err.response?.data?.message || err.message));
                                     }
@@ -426,29 +376,66 @@ export default function CmCatalogPage() {
                         </div>
                     </div>
                     <div className="cc-rp-body">
+                        <div className="cc-info-grid" style={{ gridTemplateColumns: '1fr 1fr', marginBottom: 16 }}>
+                            <div className="cc-info-box">
+                                <div className="cc-info-lbl">Trạng thái hiện tại</div>
+                                <select
+                                    className={`cc-status-select cc-status-select--${spec.isActive ? 'published' : 'hidden'}`}
+                                    value={spec.isActive ? 'published' : 'hidden'}
+                                    onChange={async (e) => {
+                                        const isActive = e.target.value === 'published';
+                                        try {
+                                            const updated = await updateSpecializationStatus(spec.id, isActive);
+                                            await loadTreeData();
+                                            selectSpec({ ...updated, narrowSpecs: spec.narrowSpecs }, major);
+                                        } catch (err) {
+                                            alert("Lỗi khi đổi trạng thái: " + (err.response?.data?.message || err.message));
+                                        }
+                                    }}
+                                >
+                                    <option value="published">● Đang kích hoạt</option>
+                                    <option value="hidden">● Đang ẩn</option>
+                                </select>
+                            </div>
+                            <div className="cc-info-box">
+                                <div className="cc-info-lbl">Số lượng CN hẹp</div>
+                                <div className="cc-info-val blue">{spec.narrowSpecs ? spec.narrowSpecs.length : 0} CN</div>
+                            </div>
+                        </div>
                         <FormRow label="Tên chuyên ngành" required maxLen={100}>
-                            <input className="cc-input" type="text" defaultValue={spec.name} maxLength={100} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} />
+                            <input className="cc-input" type="text" value={form.name} maxLength={100} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} />
                         </FormRow>
                         <FormRow label="Mã chuyên ngành" required>
-                            <input className="cc-input" type="text" defaultValue={spec.code} onChange={e => setForm(p => ({ ...p, code: e.target.value }))} />
+                            <input className="cc-input" type="text" value={form.code} onChange={e => setForm(p => ({ ...p, code: e.target.value }))} />
                         </FormRow>
                         <FormRow label="Ngành cha" required>
-                            <select className="cc-input cc-select" defaultValue={major.id} onChange={e => setForm(p => ({ ...p, parentId: e.target.value }))}>
+                            <select className="cc-input cc-select" value={form.parentId} onChange={e => setForm(p => ({ ...p, parentId: e.target.value }))}>
                                 {tree.map(m => (
                                     <option key={m.id} value={m.id}>{m.name}</option>
                                 ))}
                             </select>
                         </FormRow>
                         <FormRow label="Mô tả" maxLen={500}>
-                            <textarea className="cc-input cc-textarea" maxLength={500} defaultValue={spec.description || ''} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} />
+                            <textarea className="cc-input cc-textarea" maxLength={500} value={form.description || ''} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} />
                         </FormRow>
+                        {/* Link section */}
+                        <div className="cc-sec-title" style={{ marginTop: 16 }}>Cấu hình liên kết</div>
+                        <div className="cc-link-section">
+                            <button className="cc-link-btn" onClick={() => navigate('/cm/curriculum', { state: { majorId: major.id, specId: spec.id, mode: 'spec' } })} type="button">
+                                <div className="cc-link-left">
+                                    <span className="cc-link-badge cc-lb-course">Môn học</span>
+                                    Quản lý môn học chuyên ngành
+                                </div>
+                                <span className="cc-link-arrow">→</span>
+                            </button>
+                        </div>
                     </div>
                 </>
             )
         }
 
-        /* VIEW NS */
-        if (panel === PANEL.VIEW_NS && selectedNS) {
+        /* EDIT NS */
+        if (panel === PANEL.EDIT_NS && selectedNS) {
             const { ns, spec, major } = selectedNS
             const checklist = getChecklist(ns, spec.isActive)
             const allOk = checklist.every(c => c.ok)
@@ -458,15 +445,48 @@ export default function CmCatalogPage() {
                         <div className="cc-rp-meta">
                             <div className="cc-rp-eyebrow">Chuyên ngành hẹp · {spec.name}</div>
                             <div className="cc-rp-title">{ns.name}</div>
-                            <div className="cc-rp-subtitle">Mã: {ns.code} · {major.name}</div>
                         </div>
                         <div className="cc-rp-btns">
-                            <button className="cc-btn cc-btn-ghost" onClick={openEditNS} type="button">Sửa thông tin</button>
                             <button 
                                 className="cc-btn cc-btn-danger-sm" 
-                                onClick={() => alert("Chức năng xóa cứng bị giới hạn để tránh mất dữ liệu liên quan. Vui lòng chuyển trạng thái sang Draft để ẩn CN hẹp này khỏi học sinh.")} 
+                                onClick={() => alert("Chức năng xóa cứng bị giới hạn để tránh mất dữ liệu liên quan. Vui lòng chuyển trạng thái sang Draft để ẩn CN hẹp này khỏi học sinh.")}  
                                 type="button"
                             >Xóa</button>
+                            <button 
+                                className="cc-btn cc-btn-save" 
+                                onClick={async () => {
+                                    if (!form.name || !form.code || !form.parentId) {
+                                        alert("Vui lòng điền các thông tin bắt buộc");
+                                        return;
+                                    }
+                                    try {
+                                        const updated = await updateNarrowSpec(ns.id, {
+                                            specializationId: form.parentId,
+                                            code: form.code,
+                                            name: form.name,
+                                            description: form.description || ""
+                                        });
+                                        alert("Đã lưu CN hẹp thành công!");
+                                        const updatedTree = await loadTreeData();
+                                        let newSpec = spec;
+                                        let newMajor = major;
+                                        if (updatedTree) {
+                                            for (const m of updatedTree) {
+                                                const foundSpec = m.specializations.find(s => s.id === form.parentId);
+                                                if (foundSpec) {
+                                                    newSpec = foundSpec;
+                                                    newMajor = m;
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                        await selectNS(updated, newSpec, newMajor);
+                                    } catch (err) {
+                                        alert("Lỗi: " + (err.response?.data?.message || err.message));
+                                    }
+                                }} 
+                                type="button"
+                            >Lưu thay đổi</button>
                         </div>
                     </div>
 
@@ -502,6 +522,26 @@ export default function CmCatalogPage() {
                             )}
                         </div>
 
+                        {/* Form fields directly editable */}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '16px', marginBottom: '24px' }}>
+                            <FormRow label="Tên chuyên ngành hẹp" required maxLen={100}>
+                                <input className="cc-input" type="text" value={form.name} maxLength={100} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} />
+                            </FormRow>
+                            <FormRow label="Mã" required>
+                                <input className="cc-input" type="text" value={form.code} onChange={e => setForm(p => ({ ...p, code: e.target.value }))} />
+                            </FormRow>
+                            <FormRow label="Chuyên ngành cha" required>
+                                <select className="cc-input cc-select" value={form.parentId} onChange={e => setForm(p => ({ ...p, parentId: e.target.value }))}>
+                                    {tree.flatMap(m => m.specializations).map(s => (
+                                        <option key={s.id} value={s.id}>{s.name}</option>
+                                    ))}
+                                </select>
+                            </FormRow>
+                            <FormRow label="Mô tả" maxLen={500}>
+                                <textarea className="cc-input cc-textarea" maxLength={500} value={form.description || ''} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} />
+                            </FormRow>
+                        </div>
+
                         {/* 4 metrics */}
                         <div className="cc-info-grid">
                             <div className="cc-info-box"><div className="cc-info-lbl">Môn chuyên sâu</div><div className={`cc-info-val${ns.courses >= 5 ? ' blue' : ' orange'}`}>{ns.courses} môn</div></div>
@@ -525,6 +565,13 @@ export default function CmCatalogPage() {
                         {/* Link section */}
                         <div className="cc-sec-title" style={{ marginTop: 16 }}>Cấu hình liên kết</div>
                         <div className="cc-link-section">
+                            <button className="cc-link-btn" onClick={() => navigate('/cm/curriculum', { state: { majorId: major.id, specId: spec.id, nsId: ns.id, mode: 'ns' } })} type="button">
+                                <div className="cc-link-left">
+                                    <span className="cc-link-badge cc-lb-course">{ns.courses || 0} môn</span>
+                                    Quản lý môn chuyên sâu liên kết
+                                </div>
+                                <span className="cc-link-arrow">→</span>
+                            </button>
                             <button className="cc-link-btn" onClick={() => navigate('')} type="button">
                                 <div className="cc-link-left">
                                     <span className="cc-link-badge cc-lb-skill">{ns.skills} kỹ năng</span>
@@ -552,65 +599,6 @@ export default function CmCatalogPage() {
             )
         }
 
-        /* EDIT NS */
-        if (panel === PANEL.EDIT_NS && selectedNS) {
-            const { ns, spec } = selectedNS
-            return (
-                <>
-                    <div className="cc-rp-header">
-                        <div className="cc-rp-meta">
-                            <div className="cc-rp-eyebrow">Chỉnh sửa · Chuyên ngành hẹp</div>
-                            <div className="cc-rp-title">{ns.name}</div>
-                        </div>
-                        <div className="cc-rp-btns">
-                            <button className="cc-btn cc-btn-ghost" onClick={cancelForm} type="button">Hủy</button>
-                            <button 
-                                className="cc-btn cc-btn-save" 
-                                onClick={async () => {
-                                    if (!form.name || !form.code || !form.parentId) {
-                                        alert("Vui lòng điền các thông tin bắt buộc");
-                                        return;
-                                    }
-                                    try {
-                                        const updated = await updateNarrowSpec(ns.id, {
-                                            specializationId: form.parentId,
-                                            code: form.code,
-                                            name: form.name,
-                                            description: form.description || ""
-                                        });
-                                        alert("Đã lưu CN hẹp thành công!");
-                                        await loadTreeData();
-                                        await selectNS(updated, spec, selectedNS.major);
-                                    } catch (err) {
-                                        alert("Lỗi: " + (err.response?.data?.message || err.message));
-                                    }
-                                }} 
-                                type="button"
-                            >Lưu thay đổi</button>
-                        </div>
-                    </div>
-                    <div className="cc-rp-body">
-                        <FormRow label="Tên chuyên ngành hẹp" required maxLen={100}>
-                            <input className="cc-input" type="text" defaultValue={ns.name} maxLength={100} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} />
-                        </FormRow>
-                        <FormRow label="Mã" required>
-                            <input className="cc-input" type="text" defaultValue={ns.code} onChange={e => setForm(p => ({ ...p, code: e.target.value }))} />
-                        </FormRow>
-                        <FormRow label="Chuyên ngành cha" required>
-                            <select className="cc-input cc-select" defaultValue={spec.id} onChange={e => setForm(p => ({ ...p, parentId: e.target.value }))}>
-                                {tree.flatMap(m => m.specializations).map(s => (
-                                    <option key={s.id} value={s.id}>{s.name}</option>
-                                ))}
-                            </select>
-                        </FormRow>
-                        <FormRow label="Mô tả" maxLen={500}>
-                            <textarea className="cc-input cc-textarea" maxLength={500} defaultValue={ns.description || ''} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} />
-                        </FormRow>
-                    </div>
-                </>
-            )
-        }
-
         /* ADD NS */
         if (panel === PANEL.ADD_NS) {
             return (
@@ -621,7 +609,6 @@ export default function CmCatalogPage() {
                             <div className="cc-rp-title">Chuyên ngành hẹp mới</div>
                         </div>
                         <div className="cc-rp-btns">
-                            <button className="cc-btn cc-btn-ghost" onClick={cancelForm} type="button">Hủy</button>
                             <button 
                                 className="cc-btn cc-btn-save" 
                                 onClick={async () => {
@@ -657,8 +644,8 @@ export default function CmCatalogPage() {
                         <FormRow label="Chuyên ngành cha" required>
                             <select className="cc-input cc-select" value={form.parentId} onChange={e => setForm(p => ({ ...p, parentId: e.target.value }))}>
                                 <option value="" disabled>Chọn Chuyên ngành...</option>
-                                {tree.flatMap(m => m.specializations).map(s => (
-                                    <option key={s.id} value={s.id}>{s.name} ({tree.find(m => m.specializations.includes(s))?.name})</option>
+                                {tree.flatMap(m => m.specializations || []).map(s => (
+                                    <option key={s.id} value={s.id}>{s.name} ({tree.find(m => m.specializations?.includes(s))?.name})</option>
                                 ))}
                             </select>
                         </FormRow>
@@ -681,7 +668,6 @@ export default function CmCatalogPage() {
                             <div className="cc-rp-title">Chuyên ngành mới</div>
                         </div>
                         <div className="cc-rp-btns">
-                            <button className="cc-btn cc-btn-ghost" onClick={cancelForm} type="button">Hủy</button>
                             <button 
                                 className="cc-btn cc-btn-save" 
                                 onClick={async () => {
@@ -738,7 +724,6 @@ export default function CmCatalogPage() {
                             <div className="cc-rp-title">Ngành mới</div>
                         </div>
                         <div className="cc-rp-btns">
-                            <button className="cc-btn cc-btn-ghost" onClick={cancelForm} type="button">Hủy</button>
                             <button 
                                 className="cc-btn cc-btn-save" 
                                 onClick={async () => {
@@ -877,7 +862,7 @@ export default function CmCatalogPage() {
                                         />
                                     </div>
 
-                                    {expandedMajors[major.id] && (
+                                    {expandedMajors[major.id] && major.specializations && major.specializations.length > 0 && (
                                         <div className="cc-spec-list">
                                             {major.specializations.map(spec => (
                                                 <div key={spec.id} className="cc-spec-node">
@@ -907,7 +892,7 @@ export default function CmCatalogPage() {
                                                         />
                                                     </div>
 
-                                                    {expandedSpecs[spec.id] && (
+                                                    {expandedSpecs[spec.id] && spec.narrowSpecs && spec.narrowSpecs.length > 0 && (
                                                         <div className="cc-ns-list">
                                                             {spec.narrowSpecs
                                                                 .filter(ns => {
@@ -918,7 +903,7 @@ export default function CmCatalogPage() {
                                                                 })
                                                                 .filter(ns => !search || ns.name.toLowerCase().includes(search.toLowerCase()))
                                                                 .map(ns => {
-                                                                    const isSel = selectedNS?.ns?.id === ns.id && (panel === PANEL.VIEW_NS || panel === PANEL.EDIT_NS)
+                                                                    const isSel = selectedNS?.ns?.id === ns.id && panel === PANEL.EDIT_NS
                                                                     return (
                                                                         <div
                                                                             key={ns.id}

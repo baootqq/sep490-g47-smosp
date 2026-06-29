@@ -64,3 +64,24 @@ export const publishNarrowSpec = async (id, isPublished) => {
     const response = await api.patch(`/narrow-specs/${id}/publish`, { isPublished });
     return response.data;
 };
+
+export const getSpecializationCourses = async (specId) => {
+    const response = await api.get(`/specializations/${specId}/courses`);
+    return response.data;
+};
+
+export const updateSpecializationCourses = async (specId, payload) => {
+    const response = await api.put(`/specializations/${specId}/courses`, payload);
+    return response.data;
+};
+
+export const getNarrowSpecCourses = async (nsId) => {
+    const response = await api.get(`/narrow-specs/${nsId}/courses`);
+    return response.data;
+};
+
+export const updateNarrowSpecCourses = async (nsId, payload) => {
+    const response = await api.put(`/narrow-specs/${nsId}/courses`, payload);
+    return response.data;
+};
+

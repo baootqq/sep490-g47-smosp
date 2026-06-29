@@ -99,6 +99,7 @@ const SIDEBAR_MENUS = {
                 { label: 'Kỹ năng & Sở thích', href: '/cm/skills' },
                 { label: 'Ngân hàng câu hỏi', href: '/cm/questions' },
                 { label: 'Chương trình học', href: '/cm/curriculum' },
+                { label: 'Danh sách môn học', href: '/cm/courses' },
             ],
         },
         {

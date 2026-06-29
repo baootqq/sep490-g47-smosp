@@ -61,12 +61,10 @@ export default function Majorcatalog({
             id: spec.id,
             code: spec.code,
             name: spec.name,
-            isHot: false, // Optional: logic for 'hot' can be added later
             narrowSpecs: publishedNS.map(ns => ({
               id: ns.id,
               code: ns.code,
               name: ns.name,
-              trending: 'stable' // Default fallback
             }))
           };
         }));
@@ -353,11 +351,11 @@ export default function Majorcatalog({
                           const isActive =
                             activeSpec?.majorId === major.id &&
                             activeSpec?.specId === spec.id;
-                          return (
+                           return (
                             <button
                               key={spec.id}
                               role="listitem"
-                              className={`spec-card${isActive ? ' spec-card--active' : ''}${spec.isHot ? ' spec-card--hot' : ''}`}
+                              className={`spec-card${isActive ? ' spec-card--active' : ''}`}
                               style={{ '--major-color': major.color }}
                               onClick={() => handleSpecClick(major.id, spec.id)}
                               aria-pressed={isActive}
