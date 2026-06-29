@@ -12,6 +12,8 @@ import CmDashboard from "../pages/cm/CmDashboard";
 import HollandQuestionPage from "../pages/cm/HollandQuestionPage";
 import HollandScoringWeightPage from "../pages/cm/HollandScoringWeightPage";
 import CmCatalogPage from "../pages/cm/CmCatalogPage";
+import CmCoursePage from "../pages/cm/CmCoursePage";
+import CmCurriculumPage from "../pages/cm/CmCurriculumPage";
 import StudentDashboard from "../pages/student/StudentDashboard";
 import HollandResultPage from "../pages/student/HollandResultPage";
 import HollandTestPage from "../pages/student/HollandTestPage";
@@ -32,73 +34,93 @@ function AppRoutes() {
       <Route path="/major-catalog" element={<MajorCatalog />} />
 
       {/* Role-based Protected Dashboards */}
-      <Route 
-        path="/admin/dashboard" 
+      <Route
+        path="/admin/dashboard"
         element={
           <ProtectedRoute allowedRoles={["ROLE_ADMIN"]}>
             <AdminDashboard />
           </ProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/cm/dashboard" 
+      <Route
+        path="/cm/dashboard"
         element={
           <ProtectedRoute allowedRoles={["ROLE_CONTENT_MANAGER"]}>
             <CmDashboard />
           </ProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/cm/questions" 
+      <Route
+        path="/cm/questions"
         element={
           <ProtectedRoute allowedRoles={["ROLE_CONTENT_MANAGER"]}>
             <HollandQuestionPage />
           </ProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/cm/holland-config" 
+      <Route
+        path="/cm/holland-config"
         element={
           <ProtectedRoute allowedRoles={["ROLE_CONTENT_MANAGER"]}>
             <HollandScoringWeightPage />
-        path="/cm/catalog" 
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/cm/catalog"
         element={
           <ProtectedRoute allowedRoles={["ROLE_CONTENT_MANAGER"]}>
             <CmCatalogPage />
           </ProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/student/dashboard" 
+      <Route
+        path="/cm/courses"
+        element={
+          <ProtectedRoute allowedRoles={["ROLE_CONTENT_MANAGER"]}>
+            <CmCoursePage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/cm/curriculum"
+        element={
+          <ProtectedRoute allowedRoles={["ROLE_CONTENT_MANAGER"]}>
+            <CmCurriculumPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/student/dashboard"
         element={
           <ProtectedRoute allowedRoles={["ROLE_STUDENT"]}>
             <StudentDashboard />
           </ProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/student/holland" 
+      <Route
+        path="/student/holland"
         element={
           <ProtectedRoute allowedRoles={["ROLE_STUDENT"]}>
             <HollandResultPage />
           </ProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/student/holland/test" 
+      <Route
+        path="/student/holland/test"
         element={
           <ProtectedRoute allowedRoles={["ROLE_STUDENT"]}>
             <HollandTestPage />
           </ProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/student/hollandtest" 
+      <Route
+        path="/student/hollandtest"
         element={
           <ProtectedRoute allowedRoles={["ROLE_STUDENT"]}>
             <HollandTestPage />
           </ProtectedRoute>
-        } 
+        }
       />
     </Routes>
   );
