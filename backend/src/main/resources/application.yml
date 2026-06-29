@@ -4,8 +4,8 @@ server:
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/smosp
-    username: postgres
-    password: 123
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -25,8 +25,8 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: sep490gr47@gmail.com
-    password: mwnp jbqa uwfd angv
+    username: ${MAIL_USERNAME:sep490gr47@gmail.com}
+    password: ${MAIL_PASSWORD}
     properties:
       mail:
         smtp:
@@ -40,7 +40,7 @@ spring:
       max-request-size: 5MB
 
 jwt:
-  secret: "eW91ci0yNTYtYml0LXNlY3JldC1rZXktY2hhbmdlLXRoaXMtaW4tcHJvZHVjdGlvbi1tdXN0LWJlLWxvbmctZW5vdWdo"
+  secret: ${JWT_SECRET}
   expiration: 86400000
   refresh-expiration: 604800000
 
@@ -61,5 +61,5 @@ app:
 
 cloudinary:
   cloud-name: ${CLOUDINARY_CLOUD_NAME:frdmazap}
-  api-key: ${CLOUDINARY_API_KEY:489871719785675}
-  api-secret: ${CLOUDINARY_API_SECRET:27mDfZb5s-TGaAhtc5ckfpGbMqM}
+  api-key: ${CLOUDINARY_API_KEY}
+  api-secret: ${CLOUDINARY_API_SECRET}

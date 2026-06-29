@@ -1,3 +1,6 @@
 # IDE
 .idea/
 *.iml
+
+# Environment Variables
+.env
