@@ -22,41 +22,54 @@ function LoginPage() {
   const [password, setPassword] = useState("");
   const [showPass, setShowPass] = useState(false);
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+
+  /* Split loading states */
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const [submitLoading, setSubmitLoading] = useState(false);
+
   const navigate = useNavigate();
 
-  const handleLoginSuccess = (data) => {
+  const handleLoginSuccess = (data, isGoogle = false) => {
     localStorage.setItem("accessToken", data.accessToken);
     localStorage.setItem("refreshToken", data.refreshToken);
     localStorage.setItem("username", data.username);
+    localStorage.setItem("loginProvider", isGoogle ? "google" : "local");
     const role = data.roles?.length > 0 ? data.roles[0] : null;
     if (role) localStorage.setItem("role", role);
 
-    if (role === "ROLE_ADMIN") {
-      navigate("/admin/dashboard");
-    } else if (role === "ROLE_CONTENT_MANAGER") {
-      navigate("/cm/dashboard");
-    } else if (role === "ROLE_STUDENT") {
-      navigate("/student/dashboard");
-    } else {
+    if (!isGoogle) {
       navigate("/");
+    } else {
+      if (role === "ROLE_ADMIN") {
+        navigate("/admin/dashboard");
+      } else if (role === "ROLE_CONTENT_MANAGER") {
+        navigate("/cm/dashboard");
+      } else if (role === "ROLE_STUDENT") {
+        navigate("/student/dashboard");
+      } else {
+        navigate("/");
+      }
     }
   };
 
   const handleGoogleLogin = async () => {
     try {
       setError("");
-      setLoading(true);
+      setGoogleLoading(true);
       const result = await signInWithPopup(auth, googleProvider);
       const idToken = await result.user.getIdToken();
       const data = await googleLogin(idToken);
-      localStorage.setItem("loginProvider", "google");
-      handleLoginSuccess(data);
+      handleLoginSuccess(data, true);
     } catch (err) {
       console.error("Google login error:", err);
-      setError(err.response?.data?.message || err.message || "Đăng nhập Google thất bại.");
+      if (err.code === "auth/popup-closed-by-user" || err.code === "auth/cancelled-popup-request" || err.message?.includes("popup-closed-by-user")) {
+        // User closed the popup, clear error state and stop loading silently
+        setError("");
+      } else {
+        setError(err.response?.data?.message || err.message || "Đăng nhập Google thất bại.");
+      }
     } finally {
-      setLoading(false);
+      setGoogleLoading(false);
     }
   };
 
@@ -67,14 +80,19 @@ function LoginPage() {
       return;
     }
     try {
-      setError(""); setLoading(true);
+      setError("");
+      setSubmitLoading(true);
       const data = await login(identifier, password);
       localStorage.setItem("loginProvider", "local");
-      handleLoginSuccess(data);
+      handleLoginSuccess(data, false);
     } catch (err) {
       setError(err.response?.data?.message || "Đăng nhập thất bại. Kiểm tra lại thông tin.");
-    } finally { setLoading(false); }
+    } finally {
+      setSubmitLoading(false);
+    }
   };
+
+  const isAnyLoading = googleLoading || submitLoading;
 
   return (
     <div className="lp-root">
@@ -86,10 +104,7 @@ function LoginPage() {
 
           <h2 className="lp-headline" style={{ fontStyle: "italic", marginTop: 15, textAlign: "center" }}>
             Hỗ trợ định hướng học thuật cho sinh viên
-
           </h2>
-
-
 
           <div className="lp-copy">
             © 2026 SMOSP
@@ -102,17 +117,21 @@ function LoginPage() {
 
           <div className="lp-form-box">
             <div className="eyebrow" style={{ marginBottom: 12 }}>Chào mừng bạn quay trở lại!</div>
-            <h1 className="lp-title">
-              Đăng nhập vào{" "}
-              <span style={{ color: "var(--accent)" }}>
-                SMOSP
-              </span>
-            </h1>
-            {/* Google */}
-            <button className="lp-google-btn" type="button"
+
+
+            {/* Google button */}
+            <button
+              className={`lp-google-btn${googleLoading ? " btn-loading" : ""}`}
+              type="button"
               onClick={handleGoogleLogin}
-              disabled={loading}>
-              <GoogleLogo /> Đăng nhập với Google
+              disabled={isAnyLoading}
+            >
+              {googleLoading ? (
+                <span className="btn-spinner" style={{ borderColor: "#4285F4 transparent transparent transparent", marginRight: "8px" }} />
+              ) : (
+                <GoogleLogo />
+              )}
+              {googleLoading ? "Đang liên kết..." : "Đăng nhập với Google"}
             </button>
 
             <div className="lp-divider">Hoặc</div>
@@ -129,7 +148,7 @@ function LoginPage() {
                   className="field-input"
                   placeholder="user@gmail.com hoặc user123"
                   value={identifier}
-                  disabled={loading}
+                  disabled={isAnyLoading}
                   autoComplete="username"
                   onChange={(e) => { setIdentifier(e.target.value); setError(""); }}
                 />
@@ -148,7 +167,7 @@ function LoginPage() {
                     type={showPass ? "text" : "password"}
                     placeholder="••••••••"
                     value={password}
-                    disabled={loading}
+                    disabled={isAnyLoading}
                     autoComplete="current-password"
                     onChange={(e) => { setPassword(e.target.value); setError(""); }}
                   />
@@ -164,6 +183,7 @@ function LoginPage() {
                   </button>
                 </div>
               </div>
+
               <Link to="/forgot-password" className="lp-forgot" style={{ fontSize: 15, display: "flex", justifyContent: "flex-end" }}>
                 Quên mật khẩu?
               </Link>
@@ -179,12 +199,13 @@ function LoginPage() {
               {/* Submit */}
               <button
                 type="submit"
-                className={`btn btn-lg btn-primary btn-full${loading ? " btn-loading" : ""}`}
-                disabled={loading}>
-                {loading
-                  ? <><span className="btn-spinner" />Đang xử lý...</>
-                  : <>Đăng nhập<ChevronRight size={16} /></>
-                }
+                className={`btn btn-lg btn-primary btn-full${submitLoading ? " btn-loading" : ""}`}
+                disabled={isAnyLoading}>
+                {submitLoading ? (
+                  <><span className="btn-spinner" style={{ marginRight: "8px" }} />Đang xử lý...</>
+                ) : (
+                  <>Đăng nhập<ChevronRight size={16} /></>
+                )}
               </button>
             </form>
 
