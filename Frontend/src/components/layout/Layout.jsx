@@ -63,6 +63,13 @@ const IconUser = () => (
     </svg>
 )
 
+const IconKey = () => (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M21 2L14.6 8.4A5.5 5.5 0 1 0 16 10L22 4z" />
+        <path d="M17 11l1-1M19.5 8.5l1.5-1.5M16 12l3-3" />
+    </svg>
+)
+
 // ─── Sidebar config per role ───────────────────────────────────────────────────
 
 const SIDEBAR_MENUS = {
@@ -313,10 +320,10 @@ export default function Layout({
                                 </div>
                                 <div className="smosp-avatar-dropdown-divider" />
                                 <Link to="/settings/account" className="smosp-avatar-menu-item" role="menuitem">
-                                    <IconUser /> Tài khoản
+                                    <IconSettings /> Thiết lập tài khoản
                                 </Link>
-                                <Link to="/settings" className="smosp-avatar-menu-item" role="menuitem">
-                                    <IconSettings /> Cài đặt
+                                <Link to="/settings/password" className="smosp-avatar-menu-item" role="menuitem">
+                                    <IconKey /> Đổi mật khẩu
                                 </Link>
                                 <div className="smosp-avatar-dropdown-divider" />
                                 <button className="smosp-avatar-menu-item danger" role="menuitem" onClick={onLogout}>

@@ -7,6 +7,7 @@ import ForgotPasswordPage from "../pages/auth/ForgotPasswordPage";
 import ResetPasswordPage from "../pages/auth/ResetPasswordPage";
 import VerifyEmailPage from "../pages/auth/VerifyEmailPage";
 import AccountPage from "../pages/auth/AccountPage";
+import ChangePasswordPage from "../pages/auth/ChangePasswordPage";
 import AdminDashboard from "../pages/admin/AdminDashboard";
 import CmDashboard from "../pages/cm/CmDashboard";
 import HollandQuestionPage from "../pages/cm/HollandQuestionPage";
@@ -30,6 +31,7 @@ function AppRoutes() {
       <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route path="/verify-email" element={<VerifyEmailPage />} />
       <Route path="/settings/account" element={<AccountPage />} />
+      <Route path="/settings/password" element={<ChangePasswordPage />} />
       <Route path="/settings" element={<Navigate to="/settings/account" replace />} />
       <Route path="/major-catalog" element={<MajorCatalog />} />
 

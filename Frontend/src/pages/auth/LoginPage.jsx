@@ -50,6 +50,7 @@ function LoginPage() {
       const result = await signInWithPopup(auth, googleProvider);
       const idToken = await result.user.getIdToken();
       const data = await googleLogin(idToken);
+      localStorage.setItem("loginProvider", "google");
       handleLoginSuccess(data);
     } catch (err) {
       console.error("Google login error:", err);
@@ -67,7 +68,9 @@ function LoginPage() {
     }
     try {
       setError(""); setLoading(true);
-      handleLoginSuccess(await login(identifier, password));
+      const data = await login(identifier, password);
+      localStorage.setItem("loginProvider", "local");
+      handleLoginSuccess(data);
     } catch (err) {
       setError(err.response?.data?.message || "Đăng nhập thất bại. Kiểm tra lại thông tin.");
     } finally { setLoading(false); }
