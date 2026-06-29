@@ -35,6 +35,8 @@ function RegisterPage() {
 
     if (role === "ROLE_ADMIN") {
       navigate("/admin/dashboard");
+    } else if (role === "ROLE_CONTENT_MANAGER") {
+      navigate("/cm/dashboard");
     } else {
       navigate("/");
     }

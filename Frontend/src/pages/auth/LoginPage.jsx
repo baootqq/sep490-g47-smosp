@@ -37,18 +37,12 @@ function LoginPage() {
     const role = data.roles?.length > 0 ? data.roles[0] : null;
     if (role) localStorage.setItem("role", role);
 
-    if (!isGoogle) {
-      navigate("/");
+    if (role === "ROLE_ADMIN") {
+      navigate("/admin/dashboard");
+    } else if (role === "ROLE_CONTENT_MANAGER") {
+      navigate("/cm/dashboard");
     } else {
-      if (role === "ROLE_ADMIN") {
-        navigate("/admin/dashboard");
-      } else if (role === "ROLE_CONTENT_MANAGER") {
-        navigate("/cm/dashboard");
-      } else if (role === "ROLE_STUDENT") {
-        navigate("/student/dashboard");
-      } else {
-        navigate("/");
-      }
+      navigate("/");
     }
   };
 
