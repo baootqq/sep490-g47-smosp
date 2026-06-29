@@ -136,54 +136,7 @@ function WeightBarChart({ wGpa, wSkill, wMarket }) {
   )
 }
 
-/* ── Chart: radar — Holland RIASEC avg weights ───────────────── */
-function HollandRadarChart({ avgWeights }) {
-  const ref = useRef(null)
-  const vals = Object.values(avgWeights).map((v) => Math.round(v * 100))
-  useEffect(() => {
-    if (!ref.current || !window.Chart) return
-    const c = new window.Chart(ref.current, {
-      type: 'radar',
-      data: {
-        labels: ['R', 'I', 'A', 'S', 'E', 'C'],
-        datasets: [{
-          data: vals,
-          backgroundColor: 'rgba(3,78,162,0.12)',
-          borderColor: '#034EA2',
-          borderWidth: 2,
-          pointBackgroundColor: '#034EA2',
-          pointRadius: 4,
-          pointHoverRadius: 6,
-        }],
-      },
-      options: {
-        responsive: false,
-        animation: { duration: 1000 },
-        scales: {
-          r: {
-            min: 0, max: 100,
-            ticks: { display: false },
-            grid: { color: 'rgba(0,0,0,0.07)' },
-            pointLabels: {
-              font: { size: 12, family: 'Be Vietnam Pro', weight: '700' },
-              color: '#6b7280',
-            },
-          },
-        },
-        plugins: { legend: { display: false } },
-      },
-    })
-    return () => c.destroy()
-  }, [])
-  return (
-    <canvas
-      ref={ref}
-      width={140} height={140}
-      role="img"
-      aria-label={`Radar RIASEC trung bình: ${Object.entries(avgWeights).map(([k, v]) => `${k}:${v}`).join(' ')}`}
-    />
-  )
-}
+
 
 /* ── Main ────────────────────────────────────────────────────── */
 export default function CmDashboard() {
@@ -206,11 +159,7 @@ export default function CmDashboard() {
     if (configVisible) setTimeout(() => setBarsReady(true), 150)
   }, [configVisible])
 
-  /* Holland dim bars — animate khi configRef visible */
-  const [hollandReady, setHollandReady] = useState(false)
-  useEffect(() => {
-    if (configVisible) setTimeout(() => setHollandReady(true), 200)
-  }, [configVisible])
+
 
   const handleLogout = async () => {
     await logout()
@@ -417,7 +366,7 @@ export default function CmDashboard() {
           style={{ transitionDelay: '80ms' }}
         >
           <div className="cm-sec-title">Cấu hình hệ thống</div>
-          <div className="cm-row-3">
+          <div className="cm-row-2">
 
             {/* Compatibility Score card */}
             <div className="cm-card">
@@ -453,53 +402,7 @@ export default function CmDashboard() {
               </button>
             </div>
 
-            {/* Holland RIASEC card */}
-            <div className="cm-card">
-              <div className="cm-ctitle">Holland RIASEC</div>
-              <p className="cm-card-sub">Trọng số trung bình các Specialization</p>
 
-              <div className="cm-holland-body">
-                <div className="cm-holland-chart">
-                  <HollandRadarChart avgWeights={d.holland.avgWeights} />
-                </div>
-                <div className="cm-holland-dims">
-                  {Object.entries(d.holland.avgWeights).map(([dim, val], i) => (
-                    <div key={dim} className="cm-hdim">
-                      <div className="cm-hdim-bar-wrap">
-                        <div
-                          className="cm-hdim-bar"
-                          style={{
-                            height: hollandReady ? `${val * 72}px` : '0px',
-                            transitionDelay: `${i * 55}ms`,
-                          }}
-                        />
-                      </div>
-                      <div className="cm-hdim-lbl">{dim}</div>
-                      <div className="cm-hdim-val">{val.toFixed(2)}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="cm-alert-list" style={{ marginTop: 8 }}>
-                {d.alerts.hollandSpecUnconfigured > 0 && (
-                  <button
-                    className="cm-alert-row cm-alert-row--warning"
-                    onClick={() => navigate('/cm/holland-config')}
-                  >
-                    <span className="cm-alert-row__dot" />
-                    <span className="cm-alert-row__text">
-                      {d.alerts.hollandSpecUnconfigured} Specialization chưa cấu hình RIASEC weight
-                    </span>
-                    <span className="cm-alert-row__action">Xem →</span>
-                  </button>
-                )}
-              </div>
-
-              <button className="cm-btn-outline" onClick={() => navigate('/cm/holland-config')}>
-                Cấu hình Holland
-              </button>
-            </div>
 
             {/* Question Bank card */}
             <div className="cm-card">
