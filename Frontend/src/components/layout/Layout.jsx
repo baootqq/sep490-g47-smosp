@@ -228,12 +228,24 @@ export default function Layout({
 
     const roleLabel = { student: 'Sinh viên', cm: 'Content Manager', admin: 'Quản trị viên' }[role]
 
+    const handleLogoClick = (e) => {
+        if (role === 'admin') {
+            navigate('/admin/dashboard')
+        } else if (role === 'cm') {
+            navigate('/cm/dashboard')
+        } else if (onLogoClick) {
+            onLogoClick(e)
+        } else {
+            navigate('/')
+        }
+    }
+
     return (
         <div className="smosp-layout">
 
             {/* ── TOPBAR ── */}
             <header className="smosp-topbar">
-                <button className="smosp-topbar-logo" onClick={onLogoClick} aria-label="SMOSP — về trang chủ">
+                <button className="smosp-topbar-logo" onClick={handleLogoClick} aria-label="SMOSP — về trang chủ">
                     <img src={logoSvg} alt="SMOSP" className="smosp-topbar-logo-img" />
                     <span className="smosp-topbar-logo-text">SMOSP</span>
                 </button>

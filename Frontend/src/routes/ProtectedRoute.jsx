@@ -1,4 +1,3 @@
-import React from "react";
 import { Navigate } from "react-router-dom";
 
 /**
@@ -19,7 +18,13 @@ function ProtectedRoute({ allowedRoles, children }) {
   }
 
   if (allowedRoles && !allowedRoles.includes(role)) {
-    // If logged in but does not have the required role, redirect to homepage or appropriate default page
+    // If logged in but does not have the required role, redirect to appropriate default page
+    if (role === "ROLE_ADMIN") {
+      return <Navigate to="/admin/dashboard" replace />;
+    }
+    if (role === "ROLE_CONTENT_MANAGER") {
+      return <Navigate to="/cm/dashboard" replace />;
+    }
     return <Navigate to="/" replace />;
   }
 

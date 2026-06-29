@@ -269,6 +269,17 @@ export default function Home({
     setActiveIntroTab(initialIntroTab === "none" ? "none" : initialIntroTab);
   }, [initialIntroTab]);
 
+  useEffect(() => {
+    const role = localStorage.getItem("role");
+    if (actualIsLoggedIn && role) {
+      if (role === "ROLE_ADMIN") {
+        navigate("/admin/dashboard", { replace: true });
+      } else if (role === "ROLE_CONTENT_MANAGER") {
+        navigate("/cm/dashboard", { replace: true });
+      }
+    }
+  }, [actualIsLoggedIn, navigate]);
+
   const openLogin = (mode = "login") => {
     navigate(mode === "register" ? "/register" : "/login");
   };

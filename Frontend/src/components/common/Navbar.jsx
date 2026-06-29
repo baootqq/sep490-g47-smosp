@@ -354,6 +354,18 @@ export default function Navbar({
     return () => document.removeEventListener('click', handler)
   }, [menuOpen])
 
+  const handleLogoClick = (e) => {
+    if (role === 'admin') {
+      navigate('/admin/dashboard')
+    } else if (role === 'cm') {
+      navigate('/cm/dashboard')
+    } else if (onLogoClick) {
+      onLogoClick(e)
+    } else {
+      navigate('/')
+    }
+  }
+
   return (
     <>
       <style>{NAVBAR_CSS}</style>
@@ -363,7 +375,7 @@ export default function Navbar({
           {/* Logo */}
           <button
             className="smosp-logo"
-            onClick={onLogoClick}
+            onClick={handleLogoClick}
             aria-label="SMOSP — về trang chủ"
           >
             <img src={logoSvg} alt="SMOSP Logo" className="smosp-logo-img" />
