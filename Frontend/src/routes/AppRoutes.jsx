@@ -32,73 +32,77 @@ function AppRoutes() {
       <Route path="/major-catalog" element={<MajorCatalog />} />
 
       {/* Role-based Protected Dashboards */}
-      <Route 
-        path="/admin/dashboard" 
+      <Route
+        path="/admin/dashboard"
         element={
           <ProtectedRoute allowedRoles={["ROLE_ADMIN"]}>
             <AdminDashboard />
           </ProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/cm/dashboard" 
+      <Route
+        path="/cm/dashboard"
         element={
           <ProtectedRoute allowedRoles={["ROLE_CONTENT_MANAGER"]}>
             <CmDashboard />
           </ProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/cm/questions" 
+      <Route
+        path="/cm/questions"
         element={
           <ProtectedRoute allowedRoles={["ROLE_CONTENT_MANAGER"]}>
             <HollandQuestionPage />
           </ProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/cm/holland-config" 
+      <Route
+        path="/cm/holland-config"
         element={
           <ProtectedRoute allowedRoles={["ROLE_CONTENT_MANAGER"]}>
             <HollandScoringWeightPage />
-        path="/cm/catalog" 
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/cm/catalog"
         element={
           <ProtectedRoute allowedRoles={["ROLE_CONTENT_MANAGER"]}>
             <CmCatalogPage />
           </ProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/student/dashboard" 
+      <Route
+        path="/student/dashboard"
         element={
           <ProtectedRoute allowedRoles={["ROLE_STUDENT"]}>
             <StudentDashboard />
           </ProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/student/holland" 
+      <Route
+        path="/student/holland"
         element={
           <ProtectedRoute allowedRoles={["ROLE_STUDENT"]}>
             <HollandResultPage />
           </ProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/student/holland/test" 
+      <Route
+        path="/student/holland/test"
         element={
           <ProtectedRoute allowedRoles={["ROLE_STUDENT"]}>
             <HollandTestPage />
           </ProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/student/hollandtest" 
+      <Route
+        path="/student/hollandtest"
         element={
           <ProtectedRoute allowedRoles={["ROLE_STUDENT"]}>
             <HollandTestPage />
           </ProtectedRoute>
-        } 
+        }
       />
     </Routes>
   );
