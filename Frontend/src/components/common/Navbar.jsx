@@ -1,23 +1,54 @@
 /**
  * Navbar.jsx — SMOSP Design System
  *
- * Navbar màu blue #034EA2 — KHÔNG thay đổi.
+ * Navbar màu blue #034EA2.
  * Logo dot màu cam #F37021.
  * Active link màu cam #F37021.
  * CTA button màu cam #F37021.
- *
- * Props:
- *   logo         string
- *   links        array  — [{ label, href, active?, onClick? }]
- *   ctaLabel     string
- *   onCtaClick   fn
- *   user         object — { name, avatarUrl? }
- *   onLogoClick  fn
  */
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import { Menu, X } from 'lucide-react'
 import logoSvg from '../../asset/logo.svg'
+import { logout, getNotifications, markNotificationAsRead, markAllNotificationsAsRead } from '../../services/authService'
+
+// ─── SVGs ───────────────────────────────────────────────────────────────────
+const IconBell = () => (
+  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+    <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+  </svg>
+)
+
+const IconChevron = ({ open }) => (
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+    style={{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 200ms ease' }}>
+    <polyline points="6 9 12 15 18 9" />
+  </svg>
+)
+
+const IconLogout = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+    <polyline points="16 17 21 12 16 7" />
+    <line x1="21" y1="12" x2="9" y2="12" />
+  </svg>
+)
+
+const IconSettings = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="3" />
+    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+  </svg>
+)
+
+const IconUser = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+    <circle cx="12" cy="7" r="4" />
+  </svg>
+)
 
 /* ── CSS ─────────────────────────────────────────────────── */
 
@@ -34,12 +65,12 @@ const NAVBAR_CSS = `
   .smosp-nav-inner {
     max-width: 100%;
     padding: 0 48px;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  position: relative;
-  box-sizing: border-box;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    box-sizing: border-box;
   }
   .smosp-logo {
     display: flex;
@@ -156,20 +187,6 @@ const NAVBAR_CSS = `
     gap: 12px;
     flex-shrink: 0;
   }
-  /* Avatar */
-  .smosp-nav-avatar {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    border: 1.5px solid rgba(255, 255, 255, 0.4);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    cursor: pointer;
-    background: rgba(255, 255, 255, 0.15);
-  }
-  /* Hamburger */
   .smosp-hamburger {
     display: none;
     align-items: center;
@@ -186,7 +203,6 @@ const NAVBAR_CSS = `
   .smosp-hamburger:hover {
     background: rgba(255, 255, 255, 0.2);
   }
-  /* Mobile menu */
   .smosp-mobile-menu {
     position: absolute;
     top: 64px;
@@ -241,6 +257,87 @@ export default function Navbar({
   onLogoClick,
 }) {
   const [menuOpen, setMenuOpen] = useState(false)
+  const navigate = useNavigate()
+
+  // Bell & Avatar Dropdown states for logged in user (matching Layout.jsx)
+  const [bellOpen, setBellOpen] = useState(false)
+  const [avatarOpen, setAvatarOpen] = useState(false)
+  const [notifList, setNotifList] = useState([])
+
+  const bellRef = useRef(null)
+  const avatarRef = useRef(null)
+
+  const unreadCount = notifList.filter((n) => !n.isRead).length
+
+  // Fetch notifications
+  useEffect(() => {
+    if (!user) return;
+    const fetchNotifs = async () => {
+      try {
+        const data = await getNotifications();
+        setNotifList(data);
+      } catch (err) {
+        console.error("Failed to fetch notifications:", err);
+      }
+    };
+    fetchNotifs();
+    // Poll every 30 seconds for new notifications
+    const interval = setInterval(fetchNotifs, 30000);
+    return () => clearInterval(interval);
+  }, [user]);
+
+  // Click outside to close dropdowns
+  useEffect(() => {
+    const handler = (e) => {
+      if (bellRef.current && !bellRef.current.contains(e.target)) setBellOpen(false)
+      if (avatarRef.current && !avatarRef.current.contains(e.target)) setAvatarOpen(false)
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
+
+  const markAllRead = async () => {
+    try {
+      await markAllNotificationsAsRead();
+      setNotifList((prev) => prev.map((n) => ({ ...n, isRead: true })));
+    } catch (err) {
+      console.error("Failed to mark all as read:", err);
+    }
+  };
+
+  const markRead = async (id) => {
+    try {
+      await markNotificationAsRead(id);
+      setNotifList((prev) => prev.map((n) => n.id === id ? { ...n, isRead: true } : n));
+    } catch (err) {
+      console.error("Failed to mark notification as read:", err);
+    }
+  };
+
+  const timeAgo = (dateStr) => {
+    if (!dateStr) return "";
+    try {
+      const seconds = Math.floor((new Date() - new Date(dateStr)) / 1000);
+      if (seconds < 60) return "Vừa xong";
+      const minutes = Math.floor(seconds / 60);
+      if (minutes < 60) return `${minutes} phút trước`;
+      const hours = Math.floor(minutes / 60);
+      if (hours < 24) return `${hours} giờ trước`;
+      const days = Math.floor(hours / 24);
+      return `${days} ngày trước`;
+    } catch (e) {
+      return "";
+    }
+  };
+
+  const handleLogout = async () => {
+    await logout()
+    navigate('/login')
+  }
+
+  const storedRole = localStorage.getItem("role")
+  const role = storedRole === "ROLE_ADMIN" ? "admin" : (storedRole === "ROLE_CONTENT_MANAGER" ? "cm" : "student")
+  const roleLabel = { student: 'Sinh viên', cm: 'Content Manager', admin: 'Quản trị viên' }[role]
 
   useEffect(() => {
     const handler = () => { if (window.innerWidth >= 769) setMenuOpen(false) }
@@ -263,7 +360,6 @@ export default function Navbar({
       <nav className="smosp-navbar" style={{ position: 'sticky' }}>
         <div className="smosp-nav-inner">
 
-          {/* Logo */}
           {/* Logo */}
           <button
             className="smosp-logo"
@@ -291,25 +387,110 @@ export default function Navbar({
 
           {/* Right area */}
           <div className="smosp-nav-right">
+            {user ? (
+              <div className="smosp-topbar-right" style={{ gap: '12px' }}>
+                
+                {/* Bell notification */}
+                <div className="smosp-topbar-bell-wrap" ref={bellRef}>
+                  <button
+                    className="smosp-topbar-icon-btn"
+                    onClick={() => { setBellOpen((v) => !v); setAvatarOpen(false) }}
+                    aria-label="Thông báo"
+                    aria-expanded={bellOpen}
+                  >
+                    <IconBell />
+                    {unreadCount > 0 && (
+                      <span className="smosp-badge">{unreadCount > 9 ? '9+' : unreadCount}</span>
+                    )}
+                  </button>
 
-            {/* Avatar */}
-            {user && (
-              <div
-                className="smosp-nav-avatar"
-                aria-label={`Tài khoản: ${user.name}`}
-                title={user.name}
-                style={user.avatarUrl ? { backgroundImage: `url(${user.avatarUrl})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}}
-              >
-                {!user.avatarUrl && (
-                  <span style={{ fontSize: '13px', fontWeight: 700, color: '#fff' }}>
-                    {user.name.charAt(0).toUpperCase()}
-                  </span>
-                )}
+                  {bellOpen && (
+                    <div className="smosp-notif-dropdown" role="dialog" aria-label="Danh sách thông báo">
+                      <div className="smosp-notif-header">
+                        <span className="smosp-notif-title">Thông báo</span>
+                        {unreadCount > 0 && (
+                          <button className="smosp-notif-mark-all" onClick={markAllRead}>
+                            Đánh dấu tất cả đã đọc
+                          </button>
+                        )}
+                      </div>
+                      <div className="smosp-notif-list">
+                        {notifList.length === 0 ? (
+                          <div className="smosp-notif-empty">Không có thông báo nào</div>
+                        ) : (
+                          notifList.map((n) => (
+                            <div
+                              key={n.id}
+                              className={`smosp-notif-item${n.isRead ? '' : ' unread'}`}
+                              onClick={() => markRead(n.id)}
+                            >
+                              {!n.isRead && <span className="smosp-notif-dot" />}
+                              <div className="smosp-notif-body">
+                                <p className="smosp-notif-msg">
+                                  <strong>{n.title}</strong>: {n.body}
+                                </p>
+                                <span className="smosp-notif-time">{timeAgo(n.createdAt)}</span>
+                              </div>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Avatar dropdown */}
+                <div className="smosp-topbar-avatar-wrap" ref={avatarRef}>
+                  <button
+                    className="smosp-topbar-avatar-btn"
+                    onClick={() => { setAvatarOpen((v) => !v); setBellOpen(false) }}
+                    aria-label={`Tài khoản: ${user.name}`}
+                    aria-expanded={avatarOpen}
+                  >
+                    {user.avatarUrl ? (
+                      <img src={user.avatarUrl} alt={user.name} className="smosp-avatar-img" />
+                    ) : (
+                      <span className="smosp-avatar-initials">
+                        {user.name.charAt(0).toUpperCase()}
+                      </span>
+                    )}
+                    <IconChevron open={avatarOpen} />
+                  </button>
+
+                  {avatarOpen && (
+                    <div className="smosp-avatar-dropdown" role="menu">
+                      <div className="smosp-avatar-dropdown-header">
+                        <div className="smosp-avatar-dropdown-avatar">
+                          {user.avatarUrl ? (
+                            <img src={user.avatarUrl} alt={user.name} className="smosp-avatar-img" />
+                          ) : (
+                            <span className="smosp-avatar-initials">
+                              {user.name.charAt(0).toUpperCase()}
+                            </span>
+                          )}
+                        </div>
+                        <div style={{ minWidth: 0 }}>
+                          <p className="smosp-avatar-name">{user.name}</p>
+                          <p className="smosp-avatar-role">{roleLabel}</p>
+                        </div>
+                      </div>
+                      <div className="smosp-avatar-dropdown-divider" />
+                      <Link to="/settings/account" className="smosp-avatar-menu-item" role="menuitem">
+                        <IconUser /> Tài khoản
+                      </Link>
+                      <Link to="/settings" className="smosp-avatar-menu-item" role="menuitem">
+                        <IconSettings /> Cài đặt
+                      </Link>
+                      <div className="smosp-avatar-dropdown-divider" />
+                      <button className="smosp-avatar-menu-item danger" role="menuitem" onClick={handleLogout}>
+                        <IconLogout /> Đăng xuất
+                      </button>
+                    </div>
+                  )}
+                </div>
+
               </div>
-            )}
-
-            {/* Auth Buttons / CTA */}
-            {!user ? (
+            ) : (
               <>
                 <button className="smosp-nav-btn-secondary" onClick={onCtaClick}>
                   {ctaLabel}
@@ -318,10 +499,6 @@ export default function Navbar({
                   {registerLabel}
                 </button>
               </>
-            ) : (
-              <button className="smosp-nav-cta" onClick={onCtaClick}>
-                {ctaLabel}
-              </button>
             )}
 
             {/* Hamburger */}
@@ -351,7 +528,7 @@ export default function Navbar({
                 {link.label}
               </a>
             ))}
-            {!user && (
+            {!user ? (
               <div style={{ padding: '8px 20px 0', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 <button
                   className="smosp-nav-btn-secondary"
@@ -368,6 +545,16 @@ export default function Navbar({
                   {registerLabel}
                 </button>
               </div>
+            ) : (
+              <div style={{ padding: '8px 20px 0', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <button
+                  className="smosp-nav-btn-secondary"
+                  style={{ width: '100%', justifyContent: 'center' }}
+                  onClick={handleLogout}
+                >
+                  Đăng xuất
+                </button>
+              </div>
             )}
           </nav>
         )}
@@ -375,32 +562,3 @@ export default function Navbar({
     </>
   )
 }
-
-/* ── Usage Examples ─────────────────────────────────────────
- *
- * import Navbar from '@/shared/components/Navbar'
- *
- * const NAV_LINKS = [
- *   { label: 'Khám Phá Ngành', href: '/explore', active: true },
- *   { label: 'Đánh Giá Holland', href: '/assessment' },
- *   { label: 'Lộ Trình Kỹ Năng', href: '/roadmap' },
- *   { label: 'So Sánh Ngành', href: '/compare' },
- * ]
- *
- * // Chưa đăng nhập
- * <Navbar
- *   logo=""
- *   links={NAV_LINKS}
- *   ctaLabel="Bắt Đầu"
- *   onCtaClick={() => navigate('/register')}
- *   onLogoClick={() => navigate('/')}
- * />
- *
- * // Đã đăng nhập
- * <Navbar
- *   logo=""
- *   links={NAV_LINKS}
- *   user={{ name: 'Nguyễn Văn A' }}
- *   onLogoClick={() => navigate('/')}
- * />
- */

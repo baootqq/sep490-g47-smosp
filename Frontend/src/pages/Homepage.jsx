@@ -7,8 +7,8 @@ import {
   GraduationCap, GitCompare, Check, AlertTriangle, ListOrdered,
   BookOpen, BarChart2, Zap
 } from "lucide-react";
-import Navbar from "../components/common/Navbar";
-import Footer from "../components/common/Footer";
+import Navbar from "../components/common/Navbar.jsx";
+import Footer from "../components/common/Footer.jsx";
 import "./Homepage.css";
 import Majorcatalog from "./guest/Majorcatalog.jsx";
 
@@ -277,13 +277,42 @@ export default function Home({
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
+  const handleDashboardRedirect = () => {
+    if (actualIsLoggedIn) {
+      const role = localStorage.getItem("role");
+      if (role === "ROLE_ADMIN") {
+        navigate("/admin/dashboard");
+      } else if (role === "ROLE_CONTENT_MANAGER") {
+        navigate("/cm/dashboard");
+      } else if (role === "ROLE_STUDENT") {
+        navigate("/student/dashboard");
+      } else {
+        navigate("/");
+      }
+    } else {
+      openLogin();
+    }
+  };
+
   const gotoFeature = (tab) => {
     if (actualIsLoggedIn) {
       const role = localStorage.getItem("role");
       if (role === "ROLE_ADMIN") {
         navigate("/admin/dashboard");
+      } else if (role === "ROLE_CONTENT_MANAGER") {
+        navigate("/cm/dashboard");
       } else {
-        onNavigateToPortalTab?.(tab);
+        if (tab === "specialization-recommendations") {
+          navigate("/student/recommendation");
+        } else if (tab === "roadmap") {
+          navigate("/student/roadmap");
+        } else if (tab === "comparison") {
+          navigate("/student/transfer");
+        } else if (tab === "holland") {
+          navigate("/student/holland");
+        } else {
+          navigate("/student/dashboard");
+        }
       }
     } else {
       openLogin("login");
@@ -301,16 +330,7 @@ export default function Home({
             href: "#",
             onClick: (e) => {
               e.preventDefault();
-              if (actualIsLoggedIn) {
-                const role = localStorage.getItem("role");
-                if (role === "ROLE_ADMIN") {
-                  navigate("/admin/dashboard");
-                } else {
-                  onNavigateToPortalTab?.("dashboard");
-                }
-              } else {
-                openLogin();
-              }
+              handleDashboardRedirect();
             }
           },
           {
@@ -333,18 +353,7 @@ export default function Home({
           },
         ]}
         ctaLabel={actualIsLoggedIn ? "Dashboard" : "Đăng nhập"}
-        onCtaClick={() => {
-          if (actualIsLoggedIn) {
-            const role = localStorage.getItem("role");
-            if (role === "ROLE_ADMIN") {
-              navigate("/admin/dashboard");
-            } else {
-              onNavigateToPortalTab?.("dashboard");
-            }
-          } else {
-            openLogin();
-          }
-        }}
+        onCtaClick={handleDashboardRedirect}
         onRegisterClick={() => openLogin("register")}
         user={user}
         onLogoClick={() => {
@@ -385,14 +394,7 @@ export default function Home({
                 </button>
               ) : (
                 <button
-                  onClick={() => {
-                    const role = localStorage.getItem("role");
-                    if (role === "ROLE_ADMIN") {
-                      navigate("/admin/dashboard");
-                    } else {
-                      onNavigateToPortalTab?.("dashboard");
-                    }
-                  }}
+                  onClick={handleDashboardRedirect}
                   className="btn btn-lg btn-ghost-blue"
                 >
                   Bảng điều khiển của tôi
@@ -461,8 +463,8 @@ export default function Home({
                 <div className="hp-feature-actions">
                   <button
                     onClick={() => {
-                      isLoggedIn
-                        ? onNavigateToPortalTab?.("dashboard", "holland")
+                      actualIsLoggedIn
+                        ? navigate("/student/holland")
                         : openLogin("login");
                     }}
                     className="btn btn-md btn-primary"

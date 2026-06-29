@@ -1,241 +1,11 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
-// Dùng chung Navbar với Homepage — điều chỉnh path nếu khác
 import Navbar from "../../components/common/Navbar";
 import Footer from "../../components/common/Footer";
-
 import './Majorcatalog.css';
 import { Link, useNavigate } from "react-router-dom";
+import { getMajors, getSpecializationsByMajor, getNarrowSpecsBySpecialization } from '../../services/catalogService';
 
-
-// ─── Mock data (thay bằng API call khi backend catalog module sẵn sàng) ───
-// Cấu trúc theo ERD: major → specialization → narrow_spec
-
-
-const CATALOG_DATA = [
-  {
-    id: 'it',
-    code: 'IT',
-    name: 'Công nghệ thông tin',
-    disciplineGroup: 'IT',
-    color: 'var(--primary)',
-    bgLight: '#FFF4EC',
-    totalNarrowSpecs: 14,
-    specializations: [
-      {
-        id: 'se',
-        code: 'SE',
-        name: 'Software Engineering',
-        isHot: true,
-        narrowSpecs: [
-          { id: 'se-01', code: 'SE-BE', name: 'Backend Development', trending: 'hot' },
-          { id: 'se-02', code: 'SE-FE', name: 'Frontend Development', trending: 'hot' },
-          { id: 'se-03', code: 'SE-MB', name: 'Mobile Development', trending: 'rising' },
-          { id: 'se-04', code: 'SE-OPS', name: 'DevOps & Cloud Engineering', trending: 'hot' },
-          { id: 'se-05', code: 'SE-GD', name: 'Game Development', trending: 'stable' },
-        ],
-      },
-      {
-        id: 'ai',
-        code: 'AI',
-        name: 'Artificial Intelligence',
-        isHot: true,
-        narrowSpecs: [
-          { id: 'ai-01', code: 'AI-ML', name: 'Machine Learning Engineering', trending: 'hot' },
-          { id: 'ai-02', code: 'AI-CV', name: 'Computer Vision', trending: 'rising' },
-          { id: 'ai-03', code: 'AI-NLP', name: 'Natural Language Processing', trending: 'hot' },
-          { id: 'ai-04', code: 'AI-DA', name: 'Data Science & Analytics', trending: 'hot' },
-        ],
-      },
-      {
-        id: 'is',
-        code: 'IS',
-        name: 'Information Systems',
-        isHot: false,
-        narrowSpecs: [
-          { id: 'is-01', code: 'IS-BI', name: 'Business Intelligence', trending: 'stable' },
-          { id: 'is-02', code: 'IS-SA', name: 'System Analysis & Design', trending: 'stable' },
-          { id: 'is-03', code: 'IS-DB', name: 'Database Administration', trending: 'stable' },
-          { id: 'is-04', code: 'IS-EC', name: 'E-Commerce Management', trending: 'rising' },
-        ],
-      },
-      {
-        id: 'ia',
-        code: 'IA',
-        name: 'Information Assurance',
-        isHot: false,
-        narrowSpecs: [
-          { id: 'ia-01', code: 'IA-SEC', name: 'Cybersecurity', trending: 'rising' },
-          { id: 'ia-02', code: 'IA-NET', name: 'Network Security', trending: 'stable' },
-        ],
-      },
-    ],
-  },
-  {
-    id: 'ba',
-    code: 'BA',
-    name: 'Kinh doanh',
-    disciplineGroup: 'Business',
-    color: 'var(--primary)',
-    bgLight: '#FFF4EC',
-    totalNarrowSpecs: 10,
-    specializations: [
-      {
-        id: 'qtkd',
-        code: 'QTKD',
-        name: 'Quản trị kinh doanh',
-        isHot: true,
-        narrowSpecs: [
-          { id: 'qtkd-01', code: 'QTKD-MK', name: 'Marketing & Sales', trending: 'hot' },
-          { id: 'qtkd-02', code: 'QTKD-HR', name: 'Human Resource Management', trending: 'stable' },
-          { id: 'qtkd-03', code: 'QTKD-OP', name: 'Operations & Supply Chain', trending: 'rising' },
-          { id: 'qtkd-04', code: 'QTKD-EN', name: 'Entrepreneurship', trending: 'rising' },
-        ],
-      },
-      {
-        id: 'fin',
-        code: 'FIN',
-        name: 'Tài chính - Ngân hàng',
-        isHot: false,
-        narrowSpecs: [
-          { id: 'fin-01', code: 'FIN-FA', name: 'Financial Analysis', trending: 'stable' },
-          { id: 'fin-02', code: 'FIN-BK', name: 'Banking & Insurance', trending: 'stable' },
-          { id: 'fin-03', code: 'FIN-INV', name: 'Investment & Securities', trending: 'rising' },
-        ],
-      },
-      {
-        id: 'acc',
-        code: 'ACC',
-        name: 'Kế toán',
-        isHot: false,
-        narrowSpecs: [
-          { id: 'acc-01', code: 'ACC-FIN', name: 'Financial Accounting', trending: 'stable' },
-          { id: 'acc-02', code: 'ACC-AUD', name: 'Audit & Tax Advisory', trending: 'stable' },
-          { id: 'acc-03', code: 'ACC-MG', name: 'Management Accounting', trending: 'stable' },
-        ],
-      },
-    ],
-  },
-  {
-    id: 'da',
-    code: 'DA',
-    name: 'Mỹ thuật số',
-    disciplineGroup: 'DigitalArt',
-    color: 'var(--primary)',
-    bgLight: '#FFF4EC',
-    totalNarrowSpecs: 7,
-    specializations: [
-      {
-        id: 'gd',
-        code: 'GD',
-        name: 'Thiết kế đồ họa',
-        isHot: true,
-        narrowSpecs: [
-          { id: 'gd-01', code: 'GD-UX', name: 'UI/UX Design', trending: 'hot' },
-          { id: 'gd-02', code: 'GD-BR', name: 'Brand & Visual Identity', trending: 'stable' },
-          { id: 'gd-03', code: 'GD-IL', name: 'Illustration & Concept Art', trending: 'stable' },
-        ],
-      },
-      {
-        id: 'vfx',
-        code: 'VFX',
-        name: 'Kỹ xảo điện ảnh',
-        isHot: false,
-        narrowSpecs: [
-          { id: 'vfx-01', code: 'VFX-3D', name: '3D Animation & Rendering', trending: 'rising' },
-          { id: 'vfx-02', code: 'VFX-PP', name: 'VFX & Post-production', trending: 'stable' },
-          { id: 'vfx-03', code: 'VFX-MG', name: 'Motion Graphics', trending: 'rising' },
-          { id: 'vfx-04', code: 'VFX-GD', name: 'Game Art & Environment', trending: 'rising' },
-        ],
-      },
-    ],
-  },
-  {
-    id: 'lang',
-    code: 'LANG',
-    name: 'Ngôn ngữ',
-    disciplineGroup: 'Languages',
-    color: 'var(--primary)',
-    bgLight: '#FFF4EC',
-    totalNarrowSpecs: 9,
-    specializations: [
-      {
-        id: 'en',
-        code: 'EN',
-        name: 'Ngôn ngữ Anh',
-        isHot: false,
-        narrowSpecs: [
-          { id: 'en-01', code: 'EN-BIZ', name: 'Business English', trending: 'stable' },
-          { id: 'en-02', code: 'EN-IT', name: 'English for Technology', trending: 'rising' },
-          { id: 'en-03', code: 'EN-TI', name: 'Translation & Interpretation', trending: 'stable' },
-        ],
-      },
-      {
-        id: 'ja',
-        code: 'JA',
-        name: 'Ngôn ngữ Nhật',
-        isHot: false,
-        narrowSpecs: [
-          { id: 'ja-01', code: 'JA-BIZ', name: 'Business Japanese', trending: 'stable' },
-          { id: 'ja-02', code: 'JA-IT', name: 'Japanese for Technology', trending: 'rising' },
-          { id: 'ja-03', code: 'JA-TI', name: 'Japanese Translation', trending: 'stable' },
-        ],
-      },
-      {
-        id: 'ko',
-        code: 'KO',
-        name: 'Ngôn ngữ Hàn',
-        isHot: false,
-        narrowSpecs: [
-          { id: 'ko-01', code: 'KO-BIZ', name: 'Business Korean', trending: 'stable' },
-          { id: 'ko-02', code: 'KO-CUL', name: 'Korean Culture & Tourism', trending: 'stable' },
-          { id: 'ko-03', code: 'KO-IT', name: 'Korean for Technology', trending: 'rising' },
-        ],
-      },
-    ],
-  },
-  {
-    id: 'law',
-    code: 'LAW',
-    name: 'Luật',
-    disciplineGroup: 'Law',
-    color: 'var(--primary)',
-    bgLight: '#FFF4EC',
-    totalNarrowSpecs: 5,
-    specializations: [
-      {
-        id: 'cl',
-        code: 'CL',
-        name: 'Luật thương mại',
-        isHot: false,
-        narrowSpecs: [
-          { id: 'cl-01', code: 'CL-CORP', name: 'Corporate & Business Law', trending: 'stable' },
-          { id: 'cl-02', code: 'CL-EC', name: 'E-Commerce Law', trending: 'rising' },
-          { id: 'cl-03', code: 'CL-CT', name: 'Contract & Property Law', trending: 'stable' },
-        ],
-      },
-      {
-        id: 'il',
-        code: 'IL',
-        name: 'Luật quốc tế',
-        isHot: false,
-        narrowSpecs: [
-          { id: 'il-01', code: 'IL-TRD', name: 'International Trade Law', trending: 'stable' },
-          { id: 'il-02', code: 'IL-IP', name: 'Intellectual Property Law', trending: 'rising' },
-        ],
-      },
-    ],
-  },
-];
-
-
-
-const TOTALS = {
-  majors: CATALOG_DATA.length,
-  specializations: CATALOG_DATA.reduce((sum, m) => sum + m.specializations.length, 0),
-  narrowSpecs: CATALOG_DATA.reduce((sum, m) => sum + m.totalNarrowSpecs, 0),
-};
-
-export default function MajorCatalog({
+export default function Majorcatalog({
   isLoggedIn = !!localStorage.getItem("accessToken"),
   onNavigateToPortalTab,
 } = {}) {
@@ -247,11 +17,85 @@ export default function MajorCatalog({
   const username = localStorage.getItem("username");
   const user = isLoggedIn && username ? { name: username } : null;
 
+  const handleDashboardRedirect = () => {
+    if (isLoggedIn) {
+      const role = localStorage.getItem("role");
+      if (role === "ROLE_ADMIN") {
+        navigate("/admin/dashboard");
+      } else if (role === "ROLE_CONTENT_MANAGER") {
+        navigate("/cm/dashboard");
+      } else if (role === "ROLE_STUDENT") {
+        navigate("/student/dashboard");
+      } else {
+        navigate("/");
+      }
+    } else {
+      openLogin();
+    }
+  };
+
   const [filterMajor, setFilterMajor] = useState('');
   const [filterSpec, setFilterSpec] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeSpec, setActiveSpec] = useState(null); // { majorId, specId }
   const panelRef = useRef(null);
+
+  const [catalogData, setCatalogData] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const loadCatalogData = async () => {
+    try {
+      setLoading(true);
+      const majors = await getMajors();
+      const activeMajors = majors.filter(m => m.isActive);
+      
+      const assembledTree = await Promise.all(activeMajors.map(async (major) => {
+        const specializations = await getSpecializationsByMajor(major.id);
+        const activeSpecs = specializations.filter(s => s.isActive);
+
+        const specsWithNS = await Promise.all(activeSpecs.map(async (spec) => {
+          const narrowSpecs = await getNarrowSpecsBySpecialization(spec.id);
+          const publishedNS = narrowSpecs.filter(ns => ns.isPublished);
+          
+          return {
+            id: spec.id,
+            code: spec.code,
+            name: spec.name,
+            narrowSpecs: publishedNS.map(ns => ({
+              id: ns.id,
+              code: ns.code,
+              name: ns.name,
+            }))
+          };
+        }));
+        
+        return {
+          id: major.id,
+          code: major.code,
+          name: major.name,
+          color: 'var(--primary)',
+          bgLight: '#FFF4EC',
+          totalNarrowSpecs: specsWithNS.reduce((acc, s) => acc + s.narrowSpecs.length, 0),
+          specializations: specsWithNS
+        };
+      }));
+      setCatalogData(assembledTree);
+    } catch (error) {
+      console.error("Failed to load catalog tree:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadCatalogData();
+  }, []);
+
+  const TOTALS = useMemo(() => ({
+    majors: catalogData.length,
+    specializations: catalogData.reduce((sum, m) => sum + m.specializations.length, 0),
+    narrowSpecs: catalogData.reduce((sum, m) => sum + m.totalNarrowSpecs, 0),
+  }), [catalogData]);
 
   // Scroll panel vào tầm nhìn sau khi mở
   useEffect(() => {
@@ -262,16 +106,16 @@ export default function MajorCatalog({
 
   // ── Danh sách spec để populate filter dropdown ──
   const allSpecs = useMemo(() =>
-    CATALOG_DATA.flatMap(m =>
+    catalogData.flatMap(m =>
       m.specializations.map(s => ({ ...s, majorName: m.name }))
     ),
-    []
+    [catalogData]
   );
 
   // ── Lọc dữ liệu theo filter + search ──
   const filteredData = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
-    return CATALOG_DATA
+    return catalogData
       .filter(m => !filterMajor || m.id === filterMajor)
       .map(m => ({
         ...m,
@@ -321,16 +165,7 @@ export default function MajorCatalog({
             href: "#",
             onClick: (e) => {
               e.preventDefault();
-              if (isLoggedIn) {
-                const role = localStorage.getItem("role");
-                if (role === "ROLE_ADMIN") {
-                  navigate("/admin/dashboard");
-                } else {
-                  onNavigateToPortalTab?.("dashboard") || navigate("/");
-                }
-              } else {
-                openLogin();
-              }
+              handleDashboardRedirect();
             }
           },
           {
@@ -351,18 +186,7 @@ export default function MajorCatalog({
           },
         ]}
         ctaLabel={isLoggedIn ? "Dashboard" : "Đăng nhập"}
-        onCtaClick={() => {
-          if (isLoggedIn) {
-            const role = localStorage.getItem("role");
-            if (role === "ROLE_ADMIN") {
-              navigate("/admin/dashboard");
-            } else {
-              onNavigateToPortalTab?.("dashboard") || navigate("/");
-            }
-          } else {
-            openLogin();
-          }
-        }}
+        onCtaClick={handleDashboardRedirect}
         onRegisterClick={() => openLogin("register")}
         user={user}
         onLogoClick={() => navigate("/")}
@@ -423,7 +247,7 @@ export default function MajorCatalog({
               }}
             >
               <option value="">Tất cả khối ngành</option>
-              {CATALOG_DATA.map(m => (
+              {catalogData.map(m => (
                 <option key={m.id} value={m.id}>{m.name}</option>
               ))}
             </select>
@@ -442,7 +266,7 @@ export default function MajorCatalog({
             >
               <option value="">Tất cả chuyên ngành</option>
               {allSpecs
-                .filter(s => !filterMajor || CATALOG_DATA.find(m => m.id === filterMajor)
+                .filter(s => !filterMajor || catalogData.find(m => m.id === filterMajor)
                   ?.specializations.some(ms => ms.id === s.id))
                 .map(s => (
                   <option key={s.id} value={s.id}>{s.code} — {s.name}</option>
@@ -485,7 +309,9 @@ export default function MajorCatalog({
       {/* ── Catalog Content ── */}
       <main className="catalog-content" id="catalog-main">
         <div className="catalog-container">
-          {filteredData.length === 0 ? (
+          {loading ? (
+             <div className="catalog-loading">Đang tải dữ liệu...</div>
+          ) : filteredData.length === 0 ? (
             <div className="catalog-empty">
               <div className="catalog-empty__icon">🔍</div>
               <h3>Không tìm thấy kết quả</h3>
@@ -525,11 +351,11 @@ export default function MajorCatalog({
                           const isActive =
                             activeSpec?.majorId === major.id &&
                             activeSpec?.specId === spec.id;
-                          return (
+                           return (
                             <button
                               key={spec.id}
                               role="listitem"
-                              className={`spec-card${isActive ? ' spec-card--active' : ''}${spec.isHot ? ' spec-card--hot' : ''}`}
+                              className={`spec-card${isActive ? ' spec-card--active' : ''}`}
                               style={{ '--major-color': major.color }}
                               onClick={() => handleSpecClick(major.id, spec.id)}
                               aria-pressed={isActive}
