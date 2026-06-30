@@ -510,7 +510,7 @@ export default function AdminDashboard() {
             <div className="ad-card">
               <div className="ad-ch">
                 <div className="ad-ch-left">
-                  <span className="ad-ctitle">Transcript &amp; học phí</span>
+                  <span className="ad-ctitle">Cấu hình transcript</span>
                   <span className="ad-cmeta">FT-57 · 58</span>
                 </div>
                 <button
@@ -545,28 +545,10 @@ export default function AdminDashboard() {
                     }
                   </div>
                 ))}
-
-                <div className="ad-divider" />
-                <div className="ad-sub-title">Giá tín chỉ học lại — tuition_config</div>
-
-                <div className="ad-srow">
-                  <span className="ad-srow-lbl">Năm học {d.tuition.year}</span>
-                  <span className="ad-srow-val">{fmtCurrency(d.tuition.retakePricePerCredit)}/TC</span>
-                </div>
-                <div className="ad-srow">
-                  <span className="ad-srow-lbl">Phí hành chính</span>
-                  <span className="ad-srow-val">{fmtCurrency(d.tuition.adminFee)}</span>
-                </div>
-                <div className="ad-srow">
-                  <span className="ad-srow-lbl">Cập nhật lần cuối</span>
-                  <span className="ad-srow-val ad-srow-val--muted">
-                    {d.tuition.updatedBy} · {d.tuition.updatedAt}
-                  </span>
-                </div>
               </div>
 
               <button className="ad-btn-nav" onClick={() => navigate('/admin/transcript-presets')} type="button">
-                Quản lý preset &amp; học phí →
+                Cấu hình transcript →
               </button>
             </div>
 

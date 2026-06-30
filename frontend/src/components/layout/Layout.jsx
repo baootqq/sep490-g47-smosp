@@ -84,16 +84,23 @@ const SIDEBAR_MENUS = {
         {
             label: 'Khám phá',
             items: [
-                { label: 'Danh mục ngành', href: '/catalog' },
-                { label: 'Gợi ý chuyên ngành', href: '/student/recommendation' },
+                { label: 'Gợi ý chuyên ngành hẹp', href: '/student/recommendation' },
             ],
         },
         {
             label: 'Học tập',
             items: [
-                { label: 'Lộ trình học tập', href: '/student/roadmap' },
+                { label: 'Lộ trình cá nhân', href: '/student/roadmap' },
                 { label: 'Phân tích chuyển ngành', href: '/student/transfer' },
-                { label: 'Đánh giá Holland', href: '/student/holland' },
+                { label: 'Bài test Holland', href: '/student/holland' },
+                { label: 'Lịch sử Holland test', href: '/student/holland/history' },
+            ],
+        },
+        {
+            label: 'Báo cáo',
+            items: [
+                { label: 'Báo cáo nội dung', href: '/student/content-report' },
+                { label: 'Báo cáo của tôi', href: '/student/my-reports' },
             ],
         },
     ],
@@ -103,17 +110,17 @@ const SIDEBAR_MENUS = {
             items: [
                 { label: 'Dashboard', href: '/cm/dashboard' },
                 { label: 'Danh mục ngành học', href: '/cm/catalog' },
-                { label: 'Kỹ năng & Sở thích', href: '/cm/skills' },
-                { label: 'Ngân hàng câu hỏi', href: '/cm/questions' },
-                { label: 'Chương trình học', href: '/cm/curriculum' },
-                { label: 'Danh sách môn học', href: '/cm/courses' },
+                { label: 'Kỹ năng', href: '/cm/skills' },
+                { label: 'Sở thích', href: '/cm/interests' },
+                { label: 'Câu hỏi Holland', href: '/cm/questions' },
+                { label: 'Khung chương trình', href: '/cm/curriculum' },
+                { label: 'Môn học', href: '/cm/courses' },
             ],
         },
         {
             label: 'Dữ liệu tuyển dụng',
             items: [
                 { label: 'Trending Weight', href: '/cm/trending-weight' },
-                { label: 'Log crawl', href: '/cm/crawl-logs' },
             ],
         },
         {
@@ -128,16 +135,22 @@ const SIDEBAR_MENUS = {
             label: 'Hệ thống',
             items: [
                 { label: 'Dashboard', href: '/admin/dashboard' },
+                { label: 'Tổng quan hệ thống', href: '/admin/system-overview' },
                 { label: 'Quản lý người dùng', href: '/admin/users' },
             ],
         },
         {
             label: 'Cấu hình',
             items: [
-                { label: 'Cấu hình hệ thống', href: '/admin/system-config' },
-                { label: 'Crawler & Adapter', href: '/admin/crawler' },
-                { label: 'AI & Token Usage', href: '/admin/ai-config' },
-                { label: 'Transcript Mapping', href: '/admin/transcript-preset' },
+                { label: 'Quản lý cào data', href: '/admin/crawler' },
+                { label: 'Cấu hình transcript', href: '/admin/transcript-preset' },
+                { label: 'Đơn giá tín chỉ', href: '/admin/credit-price' },
+            ],
+        },
+        {
+            label: 'Báo cáo',
+            items: [
+                { label: 'Báo cáo', href: '/admin/reports' },
             ],
         },
     ],
