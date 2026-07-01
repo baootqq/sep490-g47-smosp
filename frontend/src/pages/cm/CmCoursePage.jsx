@@ -345,15 +345,15 @@ export default function CmCoursePage() {
                 <div className="course-rp-body">
                     {/* Status Dropdown */}
                     {!isAdd && (
-                        <div className="course-form-field" style={{ marginBottom: '16px' }}>
-                            <label className="course-form-label">Trạng thái môn học</label>
+                        <div className="course-status-row">
+                            <span className="course-status-label">Trạng thái môn học</span>
                             <select
-                                className="course-input course-select"
+                                className={`course-status-select course-status-select--${form.isActive ? 'active' : 'inactive'}`}
                                 value={form.isActive ? 'active' : 'inactive'}
                                 onChange={e => setForm(p => ({ ...p, isActive: e.target.value === 'active' }))}
                             >
-                                <option value="active">🟢 Đang kích hoạt — có thể gán vào roadmap</option>
-                                <option value="inactive">⚫ Đã vô hiệu hóa — không thể gán vào cấu hình curriculum mới (BR-09)</option>
+                                <option value="active">🟢 Đang kích hoạt</option>
+                                <option value="inactive">⚫ Đã vô hiệu hóa</option>
                             </select>
                         </div>
                     )}

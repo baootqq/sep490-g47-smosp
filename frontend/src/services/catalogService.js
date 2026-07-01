@@ -85,3 +85,24 @@ export const updateNarrowSpecCourses = async (nsId, payload) => {
     return response.data;
 };
 
+export const uploadMajorImage = async (code, file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await api.post(`/majors/${code}/image`, formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data'
+        }
+    });
+    return response.data;
+};
+
+export const uploadSpecializationImage = async (code, file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await api.post(`/specializations/${code}/image`, formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data'
+        }
+    });
+    return response.data;
+};

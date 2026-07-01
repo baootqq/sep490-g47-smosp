@@ -1,0 +1,37 @@
+@import "./MajorDetailPage.css";
+
+/* SpecDetailPage Specific Styling */
+
+.spec-status-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 450px;
+    gap: 16px;
+}
+
+.spec-status-text {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.spec-status-btn {
+    padding: 10px 20px;
+    background: #f37021;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 700;
+}
+
+.major-banner-link {
+    color: #034ea2;
+    font-weight: 800;
+    text-decoration: none;
+}
+
+.major-banner-link:hover {
+    text-decoration: underline;
+}

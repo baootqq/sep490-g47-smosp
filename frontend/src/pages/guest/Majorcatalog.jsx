@@ -75,6 +75,9 @@ export default function Majorcatalog({
           name: major.name,
           color: 'var(--primary)',
           bgLight: '#FFF4EC',
+          imageUrl: major.imageUrl,
+          tuitionPerTerm: major.tuitionPerTerm,
+          pricePerCredit: major.pricePerCredit,
           totalNarrowSpecs: specsWithNS.reduce((acc, s) => acc + s.narrowSpecs.length, 0),
           specializations: specsWithNS
         };
@@ -336,12 +339,38 @@ export default function Majorcatalog({
                         '--major-bg': major.bgLight,
                       }}
                     >
-                      <span className="major-label__icon">{major.icon}</span>
                       <span className="major-label__code">{major.code}</span>
                       <span className="major-label__name">{major.name}</span>
                       <span className="major-label__count">
                         {major.specializations.length} chuyên ngành
                       </span>
+                      <button
+                        className="major-label__detail-btn"
+                        style={{
+                          marginTop: '10px',
+                          padding: '6px 12px',
+                          borderRadius: '6px',
+                          border: '1.5px solid var(--major-color)',
+                          background: 'transparent',
+                          color: 'var(--major-color)',
+                          fontSize: '11px',
+                          fontWeight: '700',
+                          cursor: 'pointer',
+                          fontFamily: 'inherit',
+                          transition: 'background 0.15s, color 0.15s'
+                        }}
+                        onClick={() => navigate(`/catalog/majors/${major.id}`)}
+                        onMouseEnter={(e) => {
+                          e.target.style.background = 'var(--major-color)';
+                          e.target.style.color = '#ffffff';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.target.style.background = 'transparent';
+                          e.target.style.color = 'var(--major-color)';
+                        }}
+                      >
+                        Chi tiết →
+                      </button>
                     </div>
 
                     {/* ── Specs + narrow spec panel (right) ── */}
@@ -366,6 +395,29 @@ export default function Majorcatalog({
                               <span className="spec-card__count">
                                 {spec.narrowSpecs.length} CN hẹp
                               </span>
+                              
+                              <span
+                                style={{
+                                  position: 'absolute',
+                                  bottom: '8px',
+                                  left: '14px',
+                                  fontSize: '10.5px',
+                                  fontWeight: '700',
+                                  color: '#034ea2',
+                                  textDecoration: 'none',
+                                  cursor: 'pointer',
+                                  transition: 'color 0.15s'
+                                }}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigate(`/catalog/specializations/${spec.id}`);
+                                }}
+                                onMouseEnter={(e) => { e.target.style.color = '#F37021'; }}
+                                onMouseLeave={(e) => { e.target.style.color = '#034ea2'; }}
+                              >
+                                Chi tiết →
+                              </span>
+
                               <svg
                                 className={`spec-card__chevron${isActive ? ' spec-card__chevron--up' : ''}`}
                                 viewBox="0 0 12 8"
@@ -413,7 +465,11 @@ export default function Majorcatalog({
                           <div className="ns-panel__grid">
                             {activeSpc.narrowSpecs.map((ns, idx) => {
                               return (
-                                <div key={ns.id} className="ns-item">
+                                <div
+                                  key={ns.id}
+                                  className="ns-item"
+                                  onClick={() => navigate(`/catalog/narrow-specs/${ns.id}`)}
+                                >
                                   <span className="ns-item__num">
                                     {String(idx + 1).padStart(2, '0')}
                                   </span>
@@ -421,7 +477,6 @@ export default function Majorcatalog({
                                     <span className="ns-item__name">{ns.name}</span>
                                     <span className="ns-item__code">{ns.code}</span>
                                   </div>
-
                                 </div>
                               );
                             })}

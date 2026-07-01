@@ -17,7 +17,9 @@ import {
     updateSpecializationStatus,
     createNarrowSpec,
     updateNarrowSpec,
-    publishNarrowSpec
+    publishNarrowSpec,
+    uploadMajorImage,
+    uploadSpecializationImage
 } from '../../services/catalogService'
 
 /* ── Checklist helper ── */
@@ -57,6 +59,7 @@ export default function CmCatalogPage() {
 
     /* Form state for add/edit */
     const [form, setForm] = useState({ name: '', code: '', parentId: '', description: '' })
+    const [selectedFile, setSelectedFile] = useState(null)
 
     /* Status dropdown on detail panel */
     const [nsStatus, setNsStatus] = useState('draft') // 'published' | 'draft' | 'hidden'
@@ -80,6 +83,7 @@ export default function CmCatalogPage() {
                         code: spec.code,
                         name: spec.name,
                         isActive: spec.isActive,
+                        imageUrl: spec.imageUrl,
                         narrowSpecs: narrowSpecs.map(ns => ({
                             id: ns.id,
                             code: ns.code,
@@ -99,6 +103,9 @@ export default function CmCatalogPage() {
                     name: major.name,
                     description: major.description,
                     isActive: major.isActive,
+                    tuitionPerTerm: major.tuitionPerTerm,
+                    pricePerCredit: major.pricePerCredit,
+                    imageUrl: major.imageUrl,
                     specializations: specsWithNS.map(s => ({
                         ...s,
                         description: specializations.find(sp => sp.id === s.id)?.description
@@ -157,7 +164,10 @@ export default function CmCatalogPage() {
             code: major.code,
             parentId: '',
             description: major.description || '',
+            tuitionPerTerm: major.tuitionPerTerm !== null && major.tuitionPerTerm !== undefined ? major.tuitionPerTerm : '',
+            pricePerCredit: major.pricePerCredit !== null && major.pricePerCredit !== undefined ? major.pricePerCredit : '',
         })
+        setSelectedFile(null)
         setPanel(PANEL.EDIT_MAJOR)
         setExpandedMajors(p => ({ ...p, [major.id]: true }))
     }
@@ -172,6 +182,7 @@ export default function CmCatalogPage() {
             parentId: major.id,
             description: spec.description || '',
         })
+        setSelectedFile(null)
         setPanel(PANEL.EDIT_SPEC)
         setExpandedSpecs(p => ({ ...p, [spec.id]: true }))
     }
@@ -213,19 +224,29 @@ export default function CmCatalogPage() {
 
     function openAddMajor() {
         setSelectedNS(null); setSelectedSpecDetail(null); setSelectedMajor(null);
-        setForm({ name: '', code: '', parentId: '', description: '' })
+        setForm({
+            name: '',
+            code: '',
+            parentId: '',
+            description: '',
+            tuitionPerTerm: '',
+            pricePerCredit: '',
+        })
+        setSelectedFile(null)
         setPanel(PANEL.ADD_MAJOR)
     }
 
     function openAddSpec(parentMajorId = '') {
         setSelectedNS(null); setSelectedSpecDetail(null); setSelectedMajor(null);
         setForm({ name: '', code: '', parentId: parentMajorId, description: '' })
+        setSelectedFile(null)
         setPanel(PANEL.ADD_SPEC)
     }
 
     function openAddNS(parentSpecId = '') {
         setSelectedNS(null); setSelectedSpecDetail(null); setSelectedMajor(null);
         setForm({ name: '', code: '', parentId: parentSpecId, description: '' })
+        setSelectedFile(null)
         setPanel(PANEL.ADD_NS)
     }
 
@@ -277,14 +298,25 @@ export default function CmCatalogPage() {
                                         return;
                                     }
                                     try {
+                                        const tuitionVal = form.tuitionPerTerm === '' || form.tuitionPerTerm === null ? null : parseFloat(form.tuitionPerTerm);
+                                        const priceVal = form.pricePerCredit === '' || form.pricePerCredit === null ? null : parseFloat(form.pricePerCredit);
+                                        
                                         const updated = await updateMajor(selectedMajor.id, {
                                             code: form.code,
                                             name: form.name,
-                                            description: form.description || ""
+                                            description: form.description || "",
+                                            tuitionPerTerm: tuitionVal,
+                                            pricePerCredit: priceVal
                                         });
+
+                                        if (selectedFile) {
+                                            await uploadMajorImage(form.code, selectedFile);
+                                        }
+
                                         alert("Đã lưu ngành học thành công!");
-                                        await loadTreeData();
-                                        selectMajor({ ...updated, specializations: selectedMajor.specializations });
+                                        const freshTree = await loadTreeData();
+                                        const refreshedMajor = freshTree?.find(m => m.id === selectedMajor.id) || { ...updated, specializations: selectedMajor.specializations };
+                                        selectMajor(refreshedMajor);
                                     } catch (err) {
                                         alert("Lỗi: " + (err.response?.data?.message || err.message));
                                     }
@@ -294,27 +326,25 @@ export default function CmCatalogPage() {
                         </div>
                     </div>
                     <div className="cc-rp-body">
-                        <div className="cc-info-grid" style={{ gridTemplateColumns: '1fr', marginBottom: 16 }}>
-                            <div className="cc-info-box">
-                                <div className="cc-info-lbl">Trạng thái hiện tại</div>
-                                <select
-                                    className={`cc-status-select cc-status-select--${selectedMajor.isActive ? 'published' : 'hidden'}`}
-                                    value={selectedMajor.isActive ? 'published' : 'hidden'}
-                                    onChange={async (e) => {
-                                        const isActive = e.target.value === 'published';
-                                        try {
-                                            const updated = await updateMajorStatus(selectedMajor.id, isActive);
-                                            await loadTreeData();
-                                            selectMajor({ ...updated, specializations: selectedMajor.specializations });
-                                        } catch (err) {
-                                            alert("Lỗi khi đổi trạng thái: " + (err.response?.data?.message || err.message));
-                                        }
-                                    }}
-                                >
-                                    <option value="published">● Đang kích hoạt</option>
-                                    <option value="hidden">● Đang ẩn</option>
-                                </select>
-                            </div>
+                        <div className="cc-status-row">
+                            <span className="cc-status-label">Trạng thái</span>
+                            <select
+                                className={`cc-status-select cc-status-select--${selectedMajor.isActive ? 'published' : 'hidden'}`}
+                                value={selectedMajor.isActive ? 'published' : 'hidden'}
+                                onChange={async (e) => {
+                                    const isActive = e.target.value === 'published';
+                                    try {
+                                        const updated = await updateMajorStatus(selectedMajor.id, isActive);
+                                        await loadTreeData();
+                                        selectMajor({ ...updated, specializations: selectedMajor.specializations });
+                                    } catch (err) {
+                                        alert("Lỗi khi đổi trạng thái: " + (err.response?.data?.message || err.message));
+                                    }
+                                }}
+                            >
+                                <option value="published">● Đang kích hoạt</option>
+                                <option value="hidden">● Đang ẩn</option>
+                            </select>
                         </div>
                         <FormRow label="Tên ngành" required maxLen={100}>
                             <input className="cc-input" type="text" value={form.name} maxLength={100} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} />
@@ -324,6 +354,37 @@ export default function CmCatalogPage() {
                         </FormRow>
                         <FormRow label="Mô tả" maxLen={500}>
                             <textarea className="cc-input cc-textarea" maxLength={500} value={form.description || ''} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} />
+                        </FormRow>
+                        <FormRow label="Học phí mỗi kỳ (VNĐ)">
+                            <input className="cc-input" type="number" min="0" step="any" value={form.tuitionPerTerm || ''} placeholder="Vd: 30000000" onChange={e => setForm(p => ({ ...p, tuitionPerTerm: e.target.value }))} />
+                        </FormRow>
+                        <FormRow label="Đơn giá mỗi tín chỉ (VNĐ)">
+                            <input className="cc-input" type="number" min="0" step="any" value={form.pricePerCredit || ''} placeholder="Vd: 1000000" onChange={e => setForm(p => ({ ...p, pricePerCredit: e.target.value }))} />
+                        </FormRow>
+                        <FormRow label="Ảnh đại diện ngành học">
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                {selectedFile ? (
+                                    <div className="cc-image-preview-container">
+                                        <img src={URL.createObjectURL(selectedFile)} className="cc-major-image-preview" alt="Preview mới" />
+                                        <span className="cc-image-preview-tag cc-image-preview-tag--new">Ảnh mới chọn</span>
+                                    </div>
+                                ) : selectedMajor.imageUrl ? (
+                                    <div className="cc-image-preview-container">
+                                        <img src={selectedMajor.imageUrl} className="cc-major-image-preview" alt="Ảnh hiện tại" />
+                                        <span className="cc-image-preview-tag">Ảnh hiện tại</span>
+                                    </div>
+                                ) : null}
+                                <input 
+                                    className="cc-input" 
+                                    type="file" 
+                                    accept="image/png, image/jpeg" 
+                                    onChange={e => {
+                                        if (e.target.files && e.target.files[0]) {
+                                            setSelectedFile(e.target.files[0]);
+                                        }
+                                    }} 
+                                />
+                            </div>
                         </FormRow>
                     </div>
                 </>
@@ -360,6 +421,9 @@ export default function CmCatalogPage() {
                                             name: form.name,
                                             description: form.description || ""
                                         });
+                                        if (selectedFile) {
+                                            await uploadSpecializationImage(form.code, selectedFile);
+                                        }
                                         alert("Đã lưu chuyên ngành thành công!");
                                         const updatedTree = await loadTreeData();
                                         let newMajor = major;
@@ -376,27 +440,27 @@ export default function CmCatalogPage() {
                         </div>
                     </div>
                     <div className="cc-rp-body">
-                        <div className="cc-info-grid" style={{ gridTemplateColumns: '1fr 1fr', marginBottom: 16 }}>
-                            <div className="cc-info-box">
-                                <div className="cc-info-lbl">Trạng thái hiện tại</div>
-                                <select
-                                    className={`cc-status-select cc-status-select--${spec.isActive ? 'published' : 'hidden'}`}
-                                    value={spec.isActive ? 'published' : 'hidden'}
-                                    onChange={async (e) => {
-                                        const isActive = e.target.value === 'published';
-                                        try {
-                                            const updated = await updateSpecializationStatus(spec.id, isActive);
-                                            await loadTreeData();
-                                            selectSpec({ ...updated, narrowSpecs: spec.narrowSpecs }, major);
-                                        } catch (err) {
-                                            alert("Lỗi khi đổi trạng thái: " + (err.response?.data?.message || err.message));
-                                        }
-                                    }}
-                                >
-                                    <option value="published">● Đang kích hoạt</option>
-                                    <option value="hidden">● Đang ẩn</option>
-                                </select>
-                            </div>
+                        <div className="cc-status-row">
+                            <span className="cc-status-label">Trạng thái</span>
+                            <select
+                                className={`cc-status-select cc-status-select--${spec.isActive ? 'published' : 'hidden'}`}
+                                value={spec.isActive ? 'published' : 'hidden'}
+                                onChange={async (e) => {
+                                    const isActive = e.target.value === 'published';
+                                    try {
+                                        const updated = await updateSpecializationStatus(spec.id, isActive);
+                                        await loadTreeData();
+                                        selectSpec({ ...updated, narrowSpecs: spec.narrowSpecs }, major);
+                                    } catch (err) {
+                                        alert("Lỗi khi đổi trạng thái: " + (err.response?.data?.message || err.message));
+                                    }
+                                }}
+                            >
+                                <option value="published">● Đang kích hoạt</option>
+                                <option value="hidden">● Đang ẩn</option>
+                            </select>
+                        </div>
+                        <div className="cc-info-grid" style={{ gridTemplateColumns: '1fr', marginBottom: 16 }}>
                             <div className="cc-info-box">
                                 <div className="cc-info-lbl">Số lượng CN hẹp</div>
                                 <div className="cc-info-val blue">{spec.narrowSpecs ? spec.narrowSpecs.length : 0} CN</div>
@@ -417,6 +481,31 @@ export default function CmCatalogPage() {
                         </FormRow>
                         <FormRow label="Mô tả" maxLen={500}>
                             <textarea className="cc-input cc-textarea" maxLength={500} value={form.description || ''} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} />
+                        </FormRow>
+                        <FormRow label="Ảnh đại diện chuyên ngành">
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                {selectedFile ? (
+                                    <div className="cc-image-preview-container">
+                                        <img src={URL.createObjectURL(selectedFile)} className="cc-major-image-preview" alt="Preview mới" />
+                                        <span className="cc-image-preview-tag cc-image-preview-tag--new">Ảnh mới chọn</span>
+                                    </div>
+                                ) : spec.imageUrl ? (
+                                    <div className="cc-image-preview-container">
+                                        <img src={spec.imageUrl} className="cc-major-image-preview" alt="Ảnh hiện tại" />
+                                        <span className="cc-image-preview-tag">Ảnh hiện tại</span>
+                                    </div>
+                                ) : null}
+                                <input 
+                                    className="cc-input" 
+                                    type="file" 
+                                    accept="image/png, image/jpeg" 
+                                    onChange={e => {
+                                        if (e.target.files && e.target.files[0]) {
+                                            setSelectedFile(e.target.files[0]);
+                                        }
+                                    }} 
+                                />
+                            </div>
                         </FormRow>
                         {/* Link section */}
                         <div className="cc-sec-title" style={{ marginTop: 16 }}>Cấu hình liên kết</div>
@@ -682,6 +771,9 @@ export default function CmCatalogPage() {
                                             name: form.name,
                                             description: form.description || ""
                                         });
+                                        if (selectedFile) {
+                                            await uploadSpecializationImage(form.code, selectedFile);
+                                        }
                                         alert("Đã tạo chuyên ngành thành công!");
                                         await loadTreeData();
                                         setPanel(PANEL.EMPTY);
@@ -709,6 +801,26 @@ export default function CmCatalogPage() {
                         <FormRow label="Mô tả" maxLen={500}>
                             <textarea className="cc-input cc-textarea" placeholder="Mô tả ngắn (tùy chọn)..." maxLength={500} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} />
                         </FormRow>
+                        <FormRow label="Ảnh đại diện chuyên ngành">
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                {selectedFile && (
+                                    <div className="cc-image-preview-container">
+                                        <img src={URL.createObjectURL(selectedFile)} className="cc-major-image-preview" alt="Preview mới" />
+                                        <span className="cc-image-preview-tag cc-image-preview-tag--new">Ảnh mới chọn</span>
+                                    </div>
+                                )}
+                                <input 
+                                    className="cc-input" 
+                                    type="file" 
+                                    accept="image/png, image/jpeg" 
+                                    onChange={e => {
+                                        if (e.target.files && e.target.files[0]) {
+                                            setSelectedFile(e.target.files[0]);
+                                        }
+                                    }} 
+                                />
+                            </div>
+                        </FormRow>
                     </div>
                 </>
             )
@@ -732,11 +844,21 @@ export default function CmCatalogPage() {
                                         return;
                                     }
                                     try {
+                                        const tuitionVal = form.tuitionPerTerm === '' || form.tuitionPerTerm === null ? null : parseFloat(form.tuitionPerTerm);
+                                        const priceVal = form.pricePerCredit === '' || form.pricePerCredit === null ? null : parseFloat(form.pricePerCredit);
+                                        
                                         await createMajor({
                                             code: form.code,
                                             name: form.name,
-                                            description: form.description || ""
+                                            description: form.description || "",
+                                            tuitionPerTerm: tuitionVal,
+                                            pricePerCredit: priceVal
                                         });
+
+                                        if (selectedFile) {
+                                            await uploadMajorImage(form.code, selectedFile);
+                                        }
+
                                         alert("Đã tạo ngành học thành công!");
                                         await loadTreeData();
                                         setPanel(PANEL.EMPTY);
@@ -757,6 +879,32 @@ export default function CmCatalogPage() {
                         </FormRow>
                         <FormRow label="Mô tả" maxLen={500}>
                             <textarea className="cc-input cc-textarea" placeholder="Mô tả ngắn (tùy chọn)..." maxLength={500} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} />
+                        </FormRow>
+                        <FormRow label="Học phí mỗi kỳ (VNĐ)">
+                            <input className="cc-input" type="number" min="0" step="any" placeholder="Vd: 30000000" onChange={e => setForm(p => ({ ...p, tuitionPerTerm: e.target.value }))} />
+                        </FormRow>
+                        <FormRow label="Đơn giá mỗi tín chỉ (VNĐ)">
+                            <input className="cc-input" type="number" min="0" step="any" placeholder="Vd: 1000000" onChange={e => setForm(p => ({ ...p, pricePerCredit: e.target.value }))} />
+                        </FormRow>
+                        <FormRow label="Ảnh đại diện ngành học">
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                {selectedFile && (
+                                    <div className="cc-image-preview-container">
+                                        <img src={URL.createObjectURL(selectedFile)} className="cc-major-image-preview" alt="Preview mới" />
+                                        <span className="cc-image-preview-tag cc-image-preview-tag--new">Ảnh mới chọn</span>
+                                    </div>
+                                )}
+                                <input 
+                                    className="cc-input" 
+                                    type="file" 
+                                    accept="image/png, image/jpeg" 
+                                    onChange={e => {
+                                        if (e.target.files && e.target.files[0]) {
+                                            setSelectedFile(e.target.files[0]);
+                                        }
+                                    }} 
+                                />
+                            </div>
                         </FormRow>
                         <p className="cc-form-note">Ngành mới sẽ ở trạng thái <strong>Active</strong> và hiển thị trong cây danh mục ngay sau khi tạo.</p>
                     </div>

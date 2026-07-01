@@ -19,6 +19,9 @@ import StudentDashboard from "../pages/student/StudentDashboard";
 import HollandResultPage from "../pages/student/HollandResultPage";
 import HollandTestPage from "../pages/student/HollandTestPage";
 import MajorCatalog from "../pages/guest/Majorcatalog";
+import MajorDetailPage from "../pages/student/MajorDetailPage";
+import SpecDetailPage from "../pages/student/SpecDetailPage";
+import NarrowSpecDetailPage from "../pages/student/NarrowSpecDetailPage";
 import ProtectedRoute from "./ProtectedRoute";
 
 function AppRoutes() {
@@ -35,6 +38,9 @@ function AppRoutes() {
       <Route path="/settings" element={<Navigate to="/settings/account" replace />} />
       <Route path="/major-catalog" element={<MajorCatalog />} />
       <Route path="/catalog" element={<MajorCatalog />} />
+      <Route path="/catalog/majors/:majorId" element={<MajorDetailPage />} />
+      <Route path="/catalog/specializations/:specId" element={<SpecDetailPage />} />
+      <Route path="/catalog/narrow-specs/:nsId" element={<NarrowSpecDetailPage />} />
 
 
       {/* Role-based Protected Dashboards */}
